@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="post">
+        <h2>{{ post.title }}</h2>
+        <p><small>By {{ post.author }} on {{ post.date }}</small></p>
+        <p>{{ post.content }}</p>
+    </div>
+    <a href="{{ url_for('index') }}">← Back to all posts</a>
+{% endblock %}

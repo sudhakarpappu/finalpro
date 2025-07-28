@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    {% for post in posts %}
+        <div class="post">
+            <h2><a href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
+            <p><small>By {{ post.author }} on {{ post.date }}</small></p>
+            <p>{{ post.content[:100] }}...</p>
+        </div>
+        <hr>
+    {% endfor %}
+{% endblock %}
