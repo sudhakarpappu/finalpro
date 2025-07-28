@@ -1,22 +1,16 @@
-from flask import Flask, render_template # type: ignore
-from blog_data import blog_posts
+from flask import Flask
+from flask_mysqldb import MySQL
 
 app = Flask(__name__)
-
-@app.route('/')
-def index():
-    return render_template('index.html', posts=blog_posts)
-
-@app.route('/post/<int:post_id>')
-def post(post_id):
-    post = next((p for p in blog_posts if p['id'] == post_id), None)
-    if post:
-        return render_template('post.html', post=post)
-    else:
-        return "Post not found", 404
-@app.route('/login')
-def login():
-    return render_template('login.html')
+app.secret_key = 'your-secret-key'  # Needed for sessions and flash
+# MySQL configuration
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'Sudhan@123'
+app.config['MYSQL_DB'] = 'pro'
+mysql = MySQL(app)
+# Import routes *after* creating `app` and `mysql`
+from controllers import routes
 
 if __name__ == '__main__':
     app.run(debug=True)

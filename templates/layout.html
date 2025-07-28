@@ -1,28 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Edu Blog</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+  <meta charset="UTF-8" /> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> 
+  <title>Edu Blog</title> 
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" /> 
+</head> 
+<body> 
+  <nav class="navMenu"> 
+    <a href="{{ url_for('index') }}">Home</a> 
+    <a href="#">Blog</a> 
+    <a href="#">Work</a> 
+    <a href="#">About</a> 
 
-</head>
-<body>
-  <nav class="navMenu">
-    <a href="{{ url_for('index') }}">Home</a>
-    <a href="#">Blog</a>
-    <a href="#">Work</a>
-    <a href="#">About</a>
-    <a href="/login">Login</a>
-    <div class="dot"></div>
-  </nav>
+    {% if session.get('user') %}
+      <span>Welcome, {{ session['user'] }}!</span>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
 
+    <div class="dot"></div> 
+  </nav> 
 
-  <!-- Main Content -->
-  <div class="container">
-    {% block content %}{% endblock %}
-  </div>
-
-
-</body>
+  <!-- Main Content --> 
+  <div class="container"> 
+    {% block content %}{% endblock %} 
+  </div> 
+</body> 
 </html>
