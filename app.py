@@ -1,5 +1,5 @@
-from flask import Flask
-from flask_mysqldb import MySQL
+from flask import Flask # type: ignore
+from flask_mysqldb import MySQL # type: ignore
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'  # Needed for sessions and flash

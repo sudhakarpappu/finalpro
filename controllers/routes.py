@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, session
+from flask import render_template, request, redirect, url_for, flash, session # type: ignore
 from app import app, mysql  # Import AFTER app & mysql are defined
 from blog_data import blog_posts
 from datetime import datetime
