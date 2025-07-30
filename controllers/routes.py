@@ -66,12 +66,16 @@ def signin():
         session['rid'] = user[5]   # user[5] = rid or role name if selected
         print(user[4])
         if user[5] == 1:  # user[4] = rid (int), 1 for admin
-            return render_template('/alogin/ahome.html', user=user)  # change route name as needed
+            return render_template('/alogin/ahome.html', user=user,posts=blog_posts)  # change route name as needed
         elif user[5] == 2:
-            return render_template('/ulogin/uhome.html', user=user)  # change route name as needed
+            return render_template('/ulogin/uhome.html', user=user,posts=blog_posts)  # change route name as needed
         else:
             flash('Unknown role. Contact admin.', 'warning')
             return redirect('/login')
     else:
         flash('Invalid email or password', 'danger')
         return redirect('/login')
+
+@app.route('/Features')
+def features(): 
+    return render_template('/alogin/features.html')

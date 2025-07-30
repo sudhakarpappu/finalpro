@@ -11,7 +11,7 @@
     <a href="{{ url_for('index') }}">Home</a> 
     <a href="#">Blog</a> 
     <a href="#">Work</a> 
-    <a href="#">Features</a> 
+    <a href="/Features">Features</a> 
 
     {% if session.get('user') %}
       <span>Welcome, {{ session['user'] }}!</span>
