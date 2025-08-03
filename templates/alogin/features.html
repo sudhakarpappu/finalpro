@@ -1,14 +1,33 @@
-    {% extends "/alogin/alayout.html" %}
+{% extends "/alogin/alayout.html" %}
 
-    {% block content %}
-    <p> hi</p>
-    <h1>Features Page</h1>
-    <p>Welcome to the features page of the Edu Blog. Here you can find various features and functionalities that enhance your blogging experience.</p>
-    <ul>
-        <li>Feature 1: User Authentication</li>
-        <li>Feature 2: Rich Text Editing</li>
-        <li>Feature 3: Commenting System</li>
-        <li>Feature 4: Tagging and Categories</li>
-        <li>Feature 5: Responsive Design</li>
-    </ul>
-    {% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4 text-primary">Feature Request & Preview</h1>
+    
+    <p>Welcome, Admin. Enter the new feature you'd like to add. The system will generate a preview for your approval.</p>
+
+    <!-- Feature Request Form -->
+    <form id="feature-form" method="POST" action="/generate_feature" class="mb-4">
+        <div class="mb-3">
+            <label for="featureDescription" class="form-label">Describe the Feature:</label>
+            <textarea class="form-control" id="featureDescription" name="featureDescription" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Generate Feature Preview</button>
+    </form>
+
+    {% if generated_code %}
+    <hr>
+    <h3>🧪 Feature Preview (Sandbox)</h3>
+    <div class="border p-3 bg-light">
+        <iframe srcdoc="{{ generated_code | safe }}" style="width: 100%; height: 400px; border: none;"></iframe>
+    </div>
+
+    <!-- Optional Approval Buttons -->
+    <form method="POST" action="/approve_feature" class="mt-3">
+        <input type="hidden" name="code_to_deploy" value="{{ generated_code | tojson | safe }}">
+        <button type="submit" class="btn btn-primary">Approve & Deploy</button>
+        <a href="/features" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

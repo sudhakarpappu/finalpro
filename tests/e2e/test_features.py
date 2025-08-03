@@ -1,4 +1,4 @@
-from playwright.sync_api import Page
+from playwright.sync_api import Page #ignore[noqa]
 
 def test_features_page(page: Page):
     # Change to your staging URL in sandbox, or run a local server in CI

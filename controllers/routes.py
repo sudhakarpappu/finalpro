@@ -2,6 +2,12 @@ from flask import render_template, request, redirect, url_for, flash, session # 
 from app import app, mysql  # Import AFTER app & mysql are defined
 from blog_data import blog_posts
 from datetime import datetime
+import google.generativeai as genai # type: ignore 
+import os
+from dotenv import load_dotenv, find_dotenv  # type: ignore
+
+import base64
+import requests # type: ignore
 
 @app.route('/')
 def index():
@@ -79,3 +85,54 @@ def signin():
 @app.route('/Features')
 def features(): 
     return render_template('/alogin/features.html')
+
+load_dotenv(find_dotenv())
+
+genai.configure(api_key=os.getenv("API_KEY"))
+
+model = genai.GenerativeModel("gemini-pro")
+
+
+@app.route("/generate_feature", methods=["POST"])
+def generate_feature():
+    description = request.form.get("featureDescription")
+
+    prompt = f"""Generate a minimal HTML+CSS block that describes the following blog feature: {description}.
+    Do not include <html>, <head>, or <body> tags. Keep it responsive and semantic."""
+
+    response = model.generate_content(prompt)
+    generated_html = response.text
+
+    return render_template("features.html", generated_code=generated_html)
+
+
+
+# GitHub integration for feature approval
+
+GITHUB_TOKEN = "YOUR_GITHUB_PAT"
+REPO_OWNER = "your-github-username"
+REPO_NAME = "your-repo-name"
+BRANCH = "main"
+
+@app.route("/approve_feature", methods=["POST"])
+def approve_feature():
+    code = request.form.get("code_to_deploy")
+    filename = f"features_pending/feature_{int(time.time())}.html"
+
+    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{filename}"
+    headers = {
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github+json"
+    }
+
+    data = {
+        "message": "Add new feature via admin panel",
+        "content": base64.b64encode(code.encode()).decode(),
+        "branch": BRANCH
+    }
+
+    response = requests.put(url, headers=headers, json=data)
+    if response.status_code == 201:
+        return redirect("/features")
+    else:
+        return f"GitHub Error: {response.json()}"
