@@ -65,10 +65,42 @@ body {
 .container {
   max-width: 800px;
   margin: 100px auto 20px;
-  background: white;
+  background: #1f1f1f; /* darker background */
   padding: 20px;
-  box-shadow: 0px 0px 10px #ccc;
+  box-shadow: 0px 0px 10px #000;
+  color: #f6f4e6;
+  border-radius: 12px;
 }
 
-/* login css */
+/* Fix user info alignment */
+.user-section {
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 1.1em;
+  font-weight: 500;
+  color: #f6f4e6;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
 
+.user-section a {
+  color: #f6f4e6;
+  text-decoration: none;
+}
+
+.user-section a:hover {
+  color: #fddb3a;
+}
+
+.user-section a {
+  color: #f6f4e6;
+  text-decoration: none;
+}
+
+.user-section a:hover {
+  color: #fddb3a;
+}
+
+/* login css */ 

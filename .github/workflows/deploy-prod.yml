@@ -1,49 +1,32 @@
-name: Deploy to Production
+name: CI/CD Pipeline
 
 on:
   push:
     branches:
-      - main
+      - main  # or your deploy branch
 
 jobs:
-  deploy:
+  build-deploy:
     runs-on: ubuntu-latest
-    environment: production
-    permissions:
-      id-token: write
-      contents: read
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          role-to-assume: ${{ secrets.AWS_PROD_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          python-version: '3.10'
 
-      # Deploy static to prod S3
-      - name: Sync static/ to S3 prod
+      - name: Install Dependencies
         run: |
-          aws s3 sync static/ s3://${{ secrets.S3_PROD_BUCKET }}/static --delete
-          # Optional CloudFront invalidation if you use it:
-          # aws cloudfront create-invalidation --distribution-id ${{ secrets.CF_DIST_ID }} --paths "/*"
+          pip install -r requirements.txt
 
-      # Deploy Flask app to PROD EC2 (simple SSH)
-      - name: SSH to prod EC2 and deploy
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.PROD_EC2_HOST }}
-          username: ${{ secrets.PROD_EC2_USER }}
-          key: ${{ secrets.PROD_EC2_SSH_KEY }}
-          script: |
-            set -e
-            cd ${{ secrets.PROD_APP_DIR }}
-            git fetch origin main
-            git checkout main
-            git reset --hard origin/main
-            python3 -m venv venv || true
-            source venv/bin/activate
-            pip install -r requirements.txt
-            sudo systemctl restart ${{ secrets.PROD_SERVICE_NAME }}
+      - name: Run Tests
+        run: |
+          pytest  # or your test command
+
+      - name: Deploy to Render
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+

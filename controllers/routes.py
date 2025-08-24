@@ -109,9 +109,9 @@ def generate_feature():
 
 # GitHub integration for feature approval
 
-GITHUB_TOKEN = "YOUR_GITHUB_PAT"
-REPO_OWNER = "your-github-username"
-REPO_NAME = "your-repo-name"
+GITHUB_TOKEN = os.environ.get("aGITHUB_PAT")
+REPO_OWNER = "sudhakarpappu"
+REPO_NAME = "finalpro"
 BRANCH = "main"
 
 @app.route("/approve_feature", methods=["POST"])

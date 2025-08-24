@@ -2,3 +2,4 @@
 pro/
 __pycache__/
 .env/
+.ci/

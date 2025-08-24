@@ -1,31 +1,38 @@
-<!DOCTYPE html> 
-<html lang="en"> 
-<head> 
-  <meta charset="UTF-8" /> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> 
-  <title>Edu Blog</title> 
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" /> 
-</head> 
-<body> 
-  <nav class="navMenu"> 
-    <a href="{{ url_for('index') }}">Home</a> 
-    <a href="#">Blog</a> 
-    <a href="#">Work</a> 
-    <a href="/Features">Features</a> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edu Blog</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
 
-    {% if session.get('user') %}
-      <span>Welcome, {{ session['user'] }}!</span>
+  <!-- TOP-RIGHT user info -->
+  {% if session.get('user') %}
+    <div class="user-section">
+      <span>{{ session['user'] }} |</span>
       <a href="{{ url_for('logout') }}">Logout</a>
-    {% else %}
+    </div>
+  {% else %}
+    <div class="user-section">
       <a href="{{ url_for('login') }}">Login</a>
-    {% endif %}
+    </div>
+  {% endif %}
 
-    <div class="dot"></div> 
-  </nav> 
+  <!-- CENTERED NAVIGATION -->
+  <nav class="navMenu">
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="#">Blog</a>
+    <a href="/Features">Features</a> 
+    
+    <div class="dot"></div>
+  </nav>
 
-  <!-- Main Content --> 
-  <div class="container"> 
-    {% block content %}{% endblock %} 
-  </div> 
-</body> 
+  <!-- MAIN PAGE CONTENT -->
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+
+</body>
 </html>
