@@ -5,7 +5,7 @@ from datetime import datetime
 import google.generativeai as genai # type: ignore 
 import os
 from dotenv import load_dotenv, find_dotenv  # type: ignore
-
+import time
 import base64
 import requests # type: ignore
 
@@ -44,42 +44,73 @@ def signup():
     cur.close()
 
     return redirect('/login')
+@app.route('/signin', methods=['POST'])  
+def signin():  
+    email = request.form['email']  
+    password = request.form['password']  
 
-@app.route('/signin', methods=['POST']) 
-def signin(): 
-    email = request.form['email'] 
-    password = request.form['password'] 
- 
-    cur = mysql.connection.cursor()
-    
-    # Join users and role to get user's role info
-    query = """
-        SELECT users.*, role.name 
-        FROM users 
-        JOIN role ON users.rid = role.rid 
-        WHERE users.email = %s
-    """
-    cur.execute(query, (email,))
-    user = cur.fetchone()
-    cur.close()
+    # 🔹 Temporary hardcoded users (can remove later when DB ready)
+    hardcoded_users = {
+        "admin@gmail.com": {
+            "password": "123123",
+            "rid": 1,
+            "name": "Admin User"
+        },
+        "sudhakarpappu@gmail.com": {
+            "password": "123123",
+            "rid": 2,
+            "name": "Sudhakar"
+        },
+        "manager@gmail.com": {
+            "password": "123123",
+            "rid": 3,
+            "name": "Manager"
+        }
+    }
 
-    print("User from DB:", user)
-    print("Email entered:", email)
-    print("Password entered:", password)
+    # 🔹 Check against hardcoded first
+    if email in hardcoded_users and hardcoded_users[email]["password"] == password:
+        user = hardcoded_users[email]
+        session['user'] = user["name"]
+        session['rid'] = user["rid"]
 
-    if user and user[3] == password:  # Assuming password is at index 3
-        session['user'] = user[1]  # user[1] = name
-        session['rid'] = user[5]   # user[5] = rid or role name if selected
-        print(user[4])
-        if user[5] == 1:  # user[4] = rid (int), 1 for admin
-            return render_template('/alogin/ahome.html', user=user,posts=blog_posts)  # change route name as needed
-        elif user[5] == 2:
-            return render_template('/ulogin/uhome.html', user=user,posts=blog_posts)  # change route name as needed
+        if user["rid"] == 1:  
+            return render_template('/alogin/ahome.html', user=user, posts=blog_posts)
+        elif user["rid"] == 2:  
+            return render_template('/ulogin/uhome.html', user=user, posts=blog_posts)
+        elif user["rid"] == 3:  
+            return render_template('/mlogin/mhome.html', user=user, posts=blog_posts)
         else:
             flash('Unknown role. Contact admin.', 'warning')
             return redirect('/login')
-    else:
-        flash('Invalid email or password', 'danger')
+
+    # 🔹 If not in hardcoded users → fallback to DB (ready for future)
+    cur = mysql.connection.cursor() 
+    query = """ 
+        SELECT users.*, role.name  
+        FROM users  
+        JOIN role ON users.rid = role.rid  
+        WHERE users.email = %s 
+    """ 
+    cur.execute(query, (email,)) 
+    user = cur.fetchone() 
+    cur.close() 
+
+    if user and user[3] == password:  # Assuming password is at index 3
+        session['user'] = user[1]  
+        session['rid'] = user[5]   
+
+        if user[5] == 1:  
+            return render_template('/alogin/ahome.html', user=user, posts=blog_posts)
+        elif user[5] == 2:  
+            return render_template('/ulogin/uhome.html', user=user, posts=blog_posts)
+        elif user[5] == 3:  
+            return render_template('/mlogin/mhome.html', user=user, posts=blog_posts)
+        else:  
+            flash('Unknown role. Contact admin.', 'warning') 
+            return redirect('/login')  
+    else:  
+        flash('Invalid email or password', 'danger')  
         return redirect('/login')
 
 @app.route('/Features')
@@ -109,7 +140,7 @@ def generate_feature():
 
 # GitHub integration for feature approval
 
-GITHUB_TOKEN = os.environ.get("aGITHUB_PAT")
+GITHUB_TOKEN = os.environ.get("GH_PAT")
 REPO_OWNER = "sudhakarpappu"
 REPO_NAME = "finalpro"
 BRANCH = "main"

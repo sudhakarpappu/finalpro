@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main  # or your deploy branch
+      - main
 
 jobs:
   build-deploy:
@@ -24,9 +24,14 @@ jobs:
 
       - name: Run Tests
         run: |
-          pytest  # or your test command
+          pytest
 
+      - name: Run MCP (Gemini)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          python scripts/run_mcp.py  # This calls your MCP server
+          
       - name: Deploy to Render
         run: |
           curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
-
