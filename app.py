@@ -12,5 +12,9 @@ mysql = MySQL(app)
 # Import routes *after* creating `app` and `mysql`
 from controllers import routes
 
-if __name__ == '__main__':
-    app.run(debug=True,port=5000)  # Run the app on port 5000
+import os
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))  # Render sets PORT automatically
+    app.run(host="0.0.0.0", port=port)
+  # Run the app on port 5000
