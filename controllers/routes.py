@@ -8,6 +8,7 @@ from dotenv import load_dotenv, find_dotenv  # type: ignore
 import time
 import base64
 import requests # type: ignore
+import pyodbc
 
 @app.route('/')
 def index():
@@ -30,88 +31,72 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('index'))
 
+server = 'localhost,1433'
+database = 'pro'
+driver = '{ODBC Driver 17 for SQL Server}'
+
+def get_connection():
+    conn_str = f"DRIVER={driver};SERVER={server};DATABASE={database};Trusted_Connection=yes;"
+    return pyodbc.connect(conn_str)
+
 @app.route('/signup', methods=['POST'])
 def signup():
     name = request.form['name']
     email = request.form['email']
-    password = request.form['password']  # Plain password
+    password = request.form['password']   # ⚠️ plain text for now (you should hash it!)
     created = datetime.now()
 
-    cur = mysql.connection.cursor()
-    cur.execute("INSERT INTO users (username, email, password, created_at) VALUES (%s, %s, %s, %s)",
-                (name, email, password, created))
-    mysql.connection.commit()
-    cur.close()
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO users (username, email, password, created_at,rid) VALUES (?, ?, ?, ?,2)",
+        (name, email, password, created)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
 
     return redirect('/login')
-@app.route('/signin', methods=['POST'])  
-def signin():  
-    email = request.form['email']  
-    password = request.form['password']  
 
-    # 🔹 Temporary hardcoded users (can remove later when DB ready)
-    hardcoded_users = {
-        "admin@gmail.com": {
-            "password": "123123",
-            "rid": 1,
-            "name": "Admin User"
-        },
-        "sudhakarpappu@gmail.com": {
-            "password": "123123",
-            "rid": 2,
-            "name": "Sudhakar"
-        },
-        "manager@gmail.com": {
-            "password": "123123",
-            "rid": 3,
-            "name": "Manager"
-        }
-    }
 
-    # 🔹 Check against hardcoded first
-    if email in hardcoded_users and hardcoded_users[email]["password"] == password:
-        user = hardcoded_users[email]
-        session['user'] = user["name"]
-        session['rid'] = user["rid"]
+@app.route('/signin', methods=['POST'])
+def signin():
+    email = request.form['email']
+    password = request.form['password']
 
-        if user["rid"] == 1:  
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query = """
+        SELECT u.username, u.email, u.password, r.rid, r.name
+        FROM users u
+        JOIN role r ON u.rid = r.rid
+        WHERE u.email = ?
+    """
+    cursor.execute(query, (email,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    print(user)
+
+    if user and user[2] == password:  # assuming password column is 3rd
+        session['user'] = user[0]     # username
+        session['rid'] = user[3]      # rid
+
+        if user[3] == 1:
             return render_template('/alogin/ahome.html', user=user, posts=blog_posts)
-        elif user["rid"] == 2:  
+        elif user[3] == 2:
             return render_template('/ulogin/uhome.html', user=user, posts=blog_posts)
-        elif user["rid"] == 3:  
+        elif user[3] == 3:
             return render_template('/mlogin/mhome.html', user=user, posts=blog_posts)
         else:
             flash('Unknown role. Contact admin.', 'warning')
             return redirect('/login')
-
-    # 🔹 If not in hardcoded users → fallback to DB (ready for future)
-    cur = mysql.connection.cursor() 
-    query = """ 
-        SELECT users.*, role.name  
-        FROM users  
-        JOIN role ON users.rid = role.rid  
-        WHERE users.email = %s 
-    """ 
-    cur.execute(query, (email,)) 
-    user = cur.fetchone() 
-    cur.close() 
-
-    if user and user[3] == password:  # Assuming password is at index 3
-        session['user'] = user[1]  
-        session['rid'] = user[5]   
-
-        if user[5] == 1:  
-            return render_template('/alogin/ahome.html', user=user, posts=blog_posts)
-        elif user[5] == 2:  
-            return render_template('/ulogin/uhome.html', user=user, posts=blog_posts)
-        elif user[5] == 3:  
-            return render_template('/mlogin/mhome.html', user=user, posts=blog_posts)
-        else:  
-            flash('Unknown role. Contact admin.', 'warning') 
-            return redirect('/login')  
-    else:  
-        flash('Invalid email or password', 'danger')  
+    else:
+        flash('Invalid email or password', 'danger')
         return redirect('/login')
+    
+
 
 @app.route('/Features')
 def features(): 
