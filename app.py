@@ -11,9 +11,7 @@ app.config['MYSQL_DB'] = 'pro'
 mysql = MySQL(app)
 # Import routes *after* creating `app` and `mysql`
 from controllers import routes
-
+import os
 if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 5000))  # Render provides $PORT
-    app.run(host="0.0.0.0", port=port, debug=False)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
