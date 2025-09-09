@@ -9,6 +9,8 @@ import time
 import base64
 import requests # type: ignore
 import pyodbc
+import MySQLdb.cursors
+MCP_SERVER_URL = "https://finalpromcp-production.up.railway.app"
 
 @app.route('/')
 def index():
@@ -98,57 +100,109 @@ def signin():
     
 
 
-@app.route('/Features')
+@app.route('/features')
 def features(): 
-    return render_template('/alogin/features.html')
+    return render_template('alogin/features.html')
 
 load_dotenv(find_dotenv())
 
 genai.configure(api_key=os.getenv("API_KEY"))
 
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel("models/gemini-1.5-flash")
+
+import os
+from controllers.chat import description as base_description, prompt as base_prompt, project_structure
+def split_files(ai_output, project_root="."):
+    files = {}
+    current_file = None
+    buffer = []
+
+    for line in ai_output.splitlines():
+        if line.strip().startswith("# file:"):
+            # Save the previous block
+            if current_file and buffer:
+                content = "\n".join(buffer).strip()
+                content = strip_code_fences(content)
+                files[current_file] = content
+            current_file = line.strip().replace("# file:", "").strip()
+            buffer = []
+        else:
+            buffer.append(line)
+
+    # Save the last one
+    if current_file and buffer:
+        content = "\n".join(buffer).strip()
+        content = strip_code_fences(content)
+        files[current_file] = content
+
+    # Special handling for routes.py → always append
+    for path, content in list(files.items()):
+        if path.endswith("routes.py"):
+            file_path = os.path.join(project_root, path)
+
+            if os.path.exists(file_path):
+                with open(file_path, "r", encoding="utf-8") as f:
+                    existing = f.read()
+
+                updated = existing.strip() + "\n\n" + content.strip()
+                files[path] = updated
+            else:
+                files[path] = content.strip()
+
+    return files
+
+
+def strip_code_fences(content: str) -> str:
+    """Remove ```lang fences from AI output if present."""
+    lines = []
+    for line in content.splitlines():
+        if line.strip().startswith("```"):
+            continue  # skip fences like ```html or ```
+        lines.append(line)
+    return "\n".join(lines).strip()
 
 
 @app.route("/generate_feature", methods=["POST"])
 def generate_feature():
-    description = request.form.get("featureDescription")
+    feature_desc = request.form.get("featureDescription")
 
-    prompt = f"""Generate a minimal HTML+CSS block that describes the following blog feature: {description}.
-    Do not include <html>, <head>, or <body> tags. Keep it responsive and semantic."""
+    # Combine the base description with user input
+    full_description = f"{base_description} {feature_desc}"
 
-    response = model.generate_content(prompt)
-    generated_html = response.text
+    # Build the final prompt cleanly
+    final_prompt = f"""
+    You are an AI developer. The project has this structure:
 
-    return render_template("features.html", generated_code=generated_html)
+    {project_structure}
 
+    Task: {full_description}
 
+    Instructions:
+    -Dont Change the file named app.py under any circumstances
+    - Indicate the file path in comments like # file: <path>.
+    - If creating new features, place HTML in templates/ulogin/.
+    - Update static/css/styles.css if styles are needed.
+    - Add Flask routes in controllers/routes.py inside the ulogin blueprint.
+    - Do not include <html>, <head>, or <body> tags.
+    - Keep code semantic, modular, and responsive.
+    """
 
-# GitHub integration for feature approval
+    # Get AI response
+    response = model.generate_content(final_prompt)
+    ai_output = response.text
 
-GITHUB_TOKEN = os.environ.get("GH_PAT")
-REPO_OWNER = "sudhakarpappu"
-REPO_NAME = "finalpro"
-BRANCH = "main"
+      # Debug: see AI output
+    files = split_files(ai_output)  # ✅ use only the global split_files
+    print(files)
+    # Commit each file to GitHub via MCP
+    for path, content in files.items():
+        payload = {
+            "file_path": path,
+            "content": content,
+            "commit_message": f"Auto-added feature: {feature_desc}"
+        }
+        mcp_response = requests.post(f"{MCP_SERVER_URL}/commit", json=payload)
+        if mcp_response.status_code != 200:
+            return f"MCP Error on {path}: {mcp_response.text}"
 
-@app.route("/approve_feature", methods=["POST"])
-def approve_feature():
-    code = request.form.get("code_to_deploy")
-    filename = f"features_pending/feature_{int(time.time())}.html"
-
-    url = f"https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/contents/{filename}"
-    headers = {
-        "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github+json"
-    }
-
-    data = {
-        "message": "Add new feature via admin panel",
-        "content": base64.b64encode(code.encode()).decode(),
-        "branch": BRANCH
-    }
-
-    response = requests.put(url, headers=headers, json=data)
-    if response.status_code == 201:
-        return redirect("/features")
-    else:
-        return f"GitHub Error: {response.json()}"
+    return redirect("/features")
