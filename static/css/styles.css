@@ -1,0 +1,44 @@
+/* Existing styles... */
+
+.feature-card {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.feature-card img {
+    width: 100%;
+    height: auto;
+}
+
+.feature-card h2 {
+    padding: 15px;
+    margin: 0;
+}
+
+.feature-card p {
+    padding: 15px;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.feature-card a {
+    display: block;
+    padding: 15px;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    background-color: #007bff; /* Example color, adjust as needed */
+    border-radius: 0 0 8px 8px; /* Rounded bottom corners */
+}
+
+/* Responsive Styles (adjust as needed) */
+@media (max-width: 768px) {
+    .feature-card {
+        width: 100%;
+    }
+}
+
+Remember to replace `/static/img/blog-placeholder.jpg` with the actual path to your image.  Also, you'll need to create the `blog-placeholder.jpg` image file and place it in the `static/img` directory.  This solution provides a basic responsive feature card; you can customize the CSS further to match your design requirements.  You may also need to adjust the routing in `app.py` (although the instructions specify not to modify this file) to register the `ulogin` blueprint if it's not already done.  For instance, you might need to add  `app.register_blueprint(ulogin)` inside `app.py` if it is not already present.
