@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, session # type: ignore
+from flask import render_template, request, redirect, url_for, flash, session,Blueprint # type: ignore
 from app import app, mysql  # Import AFTER app & mysql are defined
 from blog_data import blog_posts
 from datetime import datetime
@@ -12,6 +12,7 @@ import pyodbc
 import MySQLdb.cursors
 MCP_SERVER_URL = "https://finalpromcp-production.up.railway.app"
 
+ulogin = Blueprint('ulogin', __name__, template_folder='../templates/ulogin')
 @app.route('/')
 def index():
     return render_template('index.html', posts=blog_posts)
