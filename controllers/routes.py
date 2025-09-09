@@ -12,7 +12,7 @@ import pyodbc
 import MySQLdb.cursors
 MCP_SERVER_URL = "https://finalpromcp-production.up.railway.app"
 
-ulogin = Blueprint('ulogin', __name__, template_folder='../templates/ulogin')
+
 @app.route('/')
 def index():
     return render_template('index.html', posts=blog_posts)
@@ -179,6 +179,7 @@ def generate_feature():
     Task: {full_description}
 
     Instructions:
+    -dont give anything about database it s already taken care 
     -Dont Change the file named app.py under any circumstances
     - Indicate the file path in comments like # file: <path>.
     - If creating new features, place HTML in templates/ulogin/.
@@ -208,13 +209,3 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import Blueprint, render_template
-from .db_setup import db # Assuming db_setup.py handles database interaction
-
-ulogin = Blueprint('ulogin', __name__, template_folder='../templates/ulogin')
-
-# Existing routes...
-
-@ulogin.route('/bloghelp') # New endpoint for blog help page
-def bloghelp():
-    return render_template('bloghelp.html')
