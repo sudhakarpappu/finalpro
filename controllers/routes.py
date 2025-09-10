@@ -181,9 +181,9 @@ def generate_feature():
     Instructions:
     - Dont Change the file named app.py under any circumstances
     - Indicate the file path in comments like # file: <path>.
-    - Also add the path to the nav bar {code}.
+    - Also add the path to the nav bar {code} and dont change the existing paths.
     - If creating new features, place HTML in templates/ulogin/.
-    - Update static/css/styles.css if styles are needed.
+    
     - Add Flask routes in controllers/routes.py inside the ulogin blueprint.
     - Do not include <html>, <head>, or <body> tags.
     - All new or modified templates must extend 'ulayout.html' and put page-specific content inside % block content %% endblock %.
@@ -211,3 +211,27 @@ def generate_feature():
 
     return redirect("/features")
 
+from flask import Blueprint, render_template, request, session, redirect, url_for
+from .db_setup import db, User
+
+ulogin = Blueprint('ulogin', __name__, template_folder='../templates/ulogin')
+
+# ... (Existing code)
+
+@ulogin.route('/blog_create', methods=['GET', 'POST'])
+def blog_create():
+    """Route for the blog creation help page."""
+    if 'user' not in session:
+        return redirect(url_for('ulogin.login')) # Redirect to login if not logged in
+    if request.method == 'POST':
+        # Handle form submission (if needed) - Add logic to create blog post here.
+        pass  # Placeholder. Add actual blog post creation logic here.
+
+    return render_template('blog_create.html')
+
+
+@ulogin.route('/feature')
+def feature():
+    return render_template('feature.html')
+
+# ... (Existing code)
