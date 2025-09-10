@@ -12,21 +12,21 @@
   {% if session.get('user') %}
     <div class="user-section">
       <span>{{ session['user'] }} |</span>
-      <a href="{{ url_for('logout') }}">Logout</a>
+      <a href="{{ url_for('ulogin.logout') }}">Logout</a>
     </div>
   {% else %}
     <div class="user-section">
-      <a href="{{ url_for('login') }}">Login</a>
+      <a href="{{ url_for('ulogin.login') }}">Login</a>
     </div>
   {% endif %}
 
   <!-- CENTERED NAVIGATION -->
   <nav class="navMenu">
-    <a href="{{ url_for('ulogin.index') }}">Home</a>  <!-- Updated path -->
+    <a href="{{ url_for('ulogin.index') }}">Home</a>
     <a href="#">Blog</a>
     <a href="#">Work</a>
     <a href="#">About</a>
-    <a href="{{ url_for('ulogin.song_preview') }}">Song Preview</a> <!-- Added new nav link -->
+    <a href="{{ url_for('ulogin.song_preview', song_id=1) }}">Song Preview</a>  <!--Added link to song preview-->
     <div class="dot"></div>
   </nav>
 
@@ -37,33 +37,3 @@
 
 </body>
 </html>
-
-
-/* file: static/css/style.css */
-
-.feature-card {
-  background-color: #f0f0f0;
-  border: 1px solid #ddd;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 5px;
-  box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-}
-
-/*Responsive Styles*/
-@media (max-width: 768px) {
-  .feature-card {
-    padding: 10px;
-  }
-}
-
-/* Add more styles as needed */
-
-**To make this work:**
-
-1.  **Create `audio/mysong.mp3`:** Place an MP3 file in the `static/audio/` directory (create the `audio` directory if it doesn't exist).
-2.  **Update `uhome.html` and `ulayout.html`:** Make sure that `uhome.html` extends `ulayout.html` (using `{% extends 'ulayout.html' %}`) so that the navigation bar updates correctly.  You might need to modify the other templates as well to correctly extend the updated layout.
-3.  **Install flask:** Make sure you have flask installed.
-
-
-This solution adds a new route, a new page, a responsive feature card, a stylesheet update for responsiveness, and updates the navigation bar to include the new page. Remember to adapt the paths and content to your specific needs.  The `songpreview.html` uses a simple `<audio>` tag;  you might want a more sophisticated player for a production environment.
