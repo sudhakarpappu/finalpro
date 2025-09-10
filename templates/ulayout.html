@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edu Blog</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+  <!-- TOP-RIGHT user info -->
+  {% if session.get('user') %}
+    <div class="user-section">
+      <span>{{ session['user'] }} |</span>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  {% else %}
+    <div class="user-section">
+      <a href="{{ url_for('login') }}">Login</a>
+    </div>
+  {% endif %}
+
+  <!-- CENTERED NAVIGATION -->
+  <nav class="navMenu">
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="#">Blog</a>  <!-- Existing Link -->
+    <a href="{{ url_for('ulogin.blog_create') }}">Create Blog</a>  <!-- New Link -->
+    <a href="#">Work</a>
+    <a href="#">About</a>
+    <div class="dot"></div>
+  </nav>
+
+  <!-- MAIN PAGE CONTENT -->
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+
+</body>
+</html>
+
+Remember to create a placeholder image `feature_image.jpg` in the `static/img` directory.  You will also need to adapt the blog creation logic in `controllers/routes.py` according to your specific needs (database interaction, etc.).  The provided code is a basic functional example.  Error handling and input validation should be added for a production-ready application.
