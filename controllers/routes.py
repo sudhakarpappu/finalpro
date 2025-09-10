@@ -112,7 +112,7 @@ genai.configure(api_key=os.getenv("API_KEY"))
 model = genai.GenerativeModel("models/gemini-1.5-flash")
 
 import os
-from controllers.chat import description as base_description, prompt as base_prompt, project_structure
+from controllers.chat import description as base_description, prompt as base_prompt, project_structure,code
 def split_files(ai_output, project_root="."):
     files = {}
     current_file = None
@@ -181,6 +181,7 @@ def generate_feature():
     Instructions:
     -Dont Change the file named app.py under any circumstances
     - Indicate the file path in comments like # file: <path>.
+    -also add the path to the nav bar {code}
     - If creating new features, place HTML in templates/ulogin/.
     - Update static/css/styles.css if styles are needed.
     - Add Flask routes in controllers/routes.py inside the ulogin blueprint.
@@ -208,10 +209,28 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, session
 
 ulogin = Blueprint('ulogin', __name__, template_folder='../templates/ulogin')
 
-@ulogin.route('/preview') # new endpoint
-def preview():
-    return render_template('preview.html')
+@ulogin.route('/songpreview') #new endpoint
+def song_preview():
+    return render_template('songpreview.html')
+
+
+@ulogin.route('/index')
+def index():
+    return render_template('index.html')
+
+@ulogin.route('/home')
+def home():
+    return render_template('uhome.html')
+
+@ulogin.route('/post')
+def post():
+    return render_template('post.html')
+
+
+@ulogin.route('/login')
+def login():
+    return render_template('login.html')
