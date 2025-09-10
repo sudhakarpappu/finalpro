@@ -1,0 +1,38 @@
+{% extends 'ulayout.html' %}
+
+{% block content %}
+  <div class="feature-card">
+    <img src="{{ url_for('static', filename='img/feature_image.jpg') }}" alt="Feature Image">  <!-- Replace with actual image path -->
+    <h2>New Responsive Feature</h2>
+    <p>This is a new responsive feature card.  It adapts to different screen sizes.</p>
+    <button>Learn More</button>
+  </div>
+{% endblock %}
+
+/* file: static/css/style.css */
+
+/* ... existing styles ... */
+
+.feature-card {
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+}
+
+.feature-card h2 {
+  margin-top: 0;
+}
+
+@media (max-width: 768px) {
+  .feature-card {
+    padding: 15px;
+  }
+}
