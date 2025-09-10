@@ -211,20 +211,3 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import render_template, Blueprint, request, redirect, url_for, session
-
-ulogin = Blueprint('ulogin', __name__, template_folder='../templates/ulogin')
-
-# ... other routes ...
-
-@ulogin.route('/song_preview/<song_id>') #new endpoint
-def song_preview(song_id):
-    #Fetch song details based on song_id from database or other source.  Replace this with your actual logic.
-    song_data = {"title": "Song Title", "artist": "Artist Name", "album_art": "path/to/album_art.jpg"} 
-    return render_template('song_preview.html', song=song_data)
-
-
-@ulogin.route('/logout')
-def logout():
-    session.pop('user', None)
-    return redirect(url_for('ulogin.login'))
