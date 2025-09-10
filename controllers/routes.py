@@ -179,15 +179,17 @@ def generate_feature():
     Task: {full_description}
 
     Instructions:
-    -Dont Change the file named app.py under any circumstances
+    - Dont Change the file named app.py under any circumstances
     - Indicate the file path in comments like # file: <path>.
-    -also add the path to the nav bar {code}
+    - Also add the path to the nav bar {code}.
     - If creating new features, place HTML in templates/ulogin/.
     - Update static/css/styles.css if styles are needed.
     - Add Flask routes in controllers/routes.py inside the ulogin blueprint.
     - Do not include <html>, <head>, or <body> tags.
+    - All new or modified templates must extend 'ulayout.html' and put page-specific content inside % block content %% endblock %.
     - Keep code semantic, modular, and responsive.
-    """
+"""
+
 
     # Get AI response
     response = model.generate_content(final_prompt)
@@ -209,28 +211,20 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import Blueprint, render_template, session
+from flask import render_template, Blueprint, request, redirect, url_for, session
 
 ulogin = Blueprint('ulogin', __name__, template_folder='../templates/ulogin')
 
-@ulogin.route('/songpreview') #new endpoint
-def song_preview():
-    return render_template('songpreview.html')
+# ... other routes ...
+
+@ulogin.route('/song_preview/<song_id>') #new endpoint
+def song_preview(song_id):
+    #Fetch song details based on song_id from database or other source.  Replace this with your actual logic.
+    song_data = {"title": "Song Title", "artist": "Artist Name", "album_art": "path/to/album_art.jpg"} 
+    return render_template('song_preview.html', song=song_data)
 
 
-@ulogin.route('/index')
-def index():
-    return render_template('index.html')
-
-@ulogin.route('/home')
-def home():
-    return render_template('uhome.html')
-
-@ulogin.route('/post')
-def post():
-    return render_template('post.html')
-
-
-@ulogin.route('/login')
-def login():
-    return render_template('login.html')
+@ulogin.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('ulogin.login'))
