@@ -48,3 +48,41 @@ Instructions:
 - Do not include <html>, <head>, or <body> tags.
 - Keep code semantic, modular, and responsive.
 """
+code="""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edu Blog</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+
+  <!-- TOP-RIGHT user info -->
+  {% if session.get('user') %}
+    <div class="user-section">
+      <span>{{ session['user'] }} |</span>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  {% else %}
+    <div class="user-section">
+      <a href="{{ url_for('login') }}">Login</a>
+    </div>
+  {% endif %}
+
+  <!-- CENTERED NAVIGATION -->
+  <nav class="navMenu">
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="#">Blog</a>
+    <a href="#">Work</a>
+    <a href="#">About</a>
+    <div class="dot"></div>
+  </nav>
+
+  <!-- MAIN PAGE CONTENT -->
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+
+</body>
+</html>"""
