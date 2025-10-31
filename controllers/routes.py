@@ -10,7 +10,7 @@ import base64
 import requests # type: ignore
 import pyodbc
 import MySQLdb.cursors
-MCP_SERVER_URL = "https://finalpromcp-production.up.railway.app"
+MCP_SERVER_URL = "http://135.235.162.57/"
 
 ulogin = Blueprint('ulogin', __name__, template_folder='../templates/ulogin')
 @app.route('/')
@@ -109,10 +109,11 @@ load_dotenv(find_dotenv())
 
 genai.configure(api_key=os.getenv("API_KEY"))
 
-model = genai.GenerativeModel("models/gemini-1.5-flash")
+#model = genai.GenerativeModel("models/gemini-live-2.5-flash-preview")
+model = genai.GenerativeModel("gemini-2.5-pro")
 
 import os
-from controllers.chat import description as base_description, prompt as base_prompt, project_structure
+from controllers.chat import description as base_description, prompt as base_prompt, project_structure,code
 def split_files(ai_output, project_root="."):
     files = {}
     current_file = None
@@ -179,14 +180,17 @@ def generate_feature():
     Task: {full_description}
 
     Instructions:
-    -Dont Change the file named app.py under any circumstances
+    - Dont Change the file named app.py under any circumstances
     - Indicate the file path in comments like # file: <path>.
+    - Also add the path to the nav bar {code} and dont change the existing paths.
     - If creating new features, place HTML in templates/ulogin/.
-    - Update static/css/styles.css if styles are needed.
+    
     - Add Flask routes in controllers/routes.py inside the ulogin blueprint.
     - Do not include <html>, <head>, or <body> tags.
+    - All new or modified templates must extend 'ulayout.html' and put page-specific content inside % block content %% endblock %.
     - Keep code semantic, modular, and responsive.
-    """
+"""
+
 
     # Get AI response
     response = model.generate_content(final_prompt)
