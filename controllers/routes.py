@@ -1,18 +1,33 @@
-from flask import render_template, request, redirect, url_for, flash, session,Blueprint # type: ignore
-from app import app, mysql  # Import AFTER app & mysql are defined
+from flask import render_template, request, redirect, url_for, flash, session, Blueprint
+from app import app  # Import AFTER app & mysql are defined (keep for compatibility)
 from blog_data import blog_posts
 from datetime import datetime
-import google.generativeai as genai # type: ignore 
+import google.generativeai as genai
 import os
-from dotenv import load_dotenv, find_dotenv  # type: ignore
+from dotenv import load_dotenv, find_dotenv
 import time
 import base64
-import requests # type: ignore
+import requests
 import pyodbc
-import MySQLdb.cursors
+
+
+# Azure SQL Server connection details
+# (Set these in your .env file for safety)
+# Example .env entries:
+# AZURE_SQL_SERVER=yourservername.database.windows.net
+# AZURE_SQL_DATABASE=data1
+# AZURE_SQL_USERNAME=yourusername
+# AZURE_SQL_PASSWORD=yourStrongPassword!
+# AZURE_SQL_DRIVER=ODBC Driver 18 for SQL Server
+
+load_dotenv(find_dotenv())
+
 MCP_SERVER_URL = "http://135.235.162.57/"
+adminlogin = "EducationalBlog"
+password = "2nEqN@LsgwahS4s"
 
 ulogin = Blueprint('ulogin', __name__, template_folder='../templates/ulogin')
+
 @app.route('/')
 def index():
     return render_template('index.html', posts=blog_posts)
@@ -34,12 +49,24 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('index'))
 
-server = 'localhost,1433'
-database = 'pro'
-driver = '{ODBC Driver 17 for SQL Server}'
 
 def get_connection():
-    conn_str = f"DRIVER={driver};SERVER={server};DATABASE={database};Trusted_Connection=yes;"
+    server = os.getenv("AZURE_SQL_SERVER")
+    database = os.getenv("AZURE_SQL_DATABASE")
+    username = os.getenv("AZURE_SQL_USERNAME")
+    password = os.getenv("AZURE_SQL_PASSWORD")
+    driver = os.getenv("AZURE_SQL_DRIVER", "ODBC Driver 18 for SQL Server")
+
+    conn_str = (
+        f"DRIVER={{{driver}}};"
+        f"SERVER={server};"
+        f"DATABASE={database};"
+        f"UID={username};"
+        f"PWD={password};"
+        "Encrypt=yes;"
+        "TrustServerCertificate=no;"
+        "Connection Timeout=30;"
+    )
     return pyodbc.connect(conn_str)
 
 @app.route('/signup', methods=['POST'])
@@ -52,7 +79,7 @@ def signup():
     conn = get_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO users (username, email, password, created_at,rid) VALUES (?, ?, ?, ?,2)",
+        "INSERT INTO users (username, email, password, created_at, rid) VALUES (?, ?, ?, ?, 2)",
         (name, email, password, created)
     )
     conn.commit()
@@ -60,7 +87,6 @@ def signup():
     conn.close()
 
     return redirect('/login')
-
 
 @app.route('/signin', methods=['POST'])
 def signin():
@@ -80,11 +106,10 @@ def signin():
     user = cursor.fetchone()
     cursor.close()
     conn.close()
-    print(user)
 
-    if user and user[2] == password:  # assuming password column is 3rd
-        session['user'] = user[0]     # username
-        session['rid'] = user[3]      # rid
+    if user and user[2] == password:
+        session['user'] = user[0]
+        session['rid'] = user[3]
 
         if user[3] == 1:
             return render_template('/alogin/ahome.html', user=user, posts=blog_posts)
@@ -98,22 +123,26 @@ def signin():
     else:
         flash('Invalid email or password', 'danger')
         return redirect('/login')
-    
-
 
 @app.route('/features')
-def features(): 
+def features():
     return render_template('alogin/features.html')
 
-load_dotenv(find_dotenv())
-
+# ✅ Google Gemini setup
 genai.configure(api_key=os.getenv("API_KEY"))
-
-#model = genai.GenerativeModel("models/gemini-live-2.5-flash-preview")
 model = genai.GenerativeModel("gemini-2.5-pro")
 
-import os
-from controllers.chat import description as base_description, prompt as base_prompt, project_structure,code
+# Import additional project context
+from controllers.chat import description as base_description, prompt as base_prompt, project_structure, code
+
+def strip_code_fences(content: str) -> str:
+    lines = []
+    for line in content.splitlines():
+        if line.strip().startswith("```"):
+            continue
+        lines.append(line)
+    return "\n".join(lines).strip()
+
 def split_files(ai_output, project_root="."):
     files = {}
     current_file = None
@@ -121,7 +150,6 @@ def split_files(ai_output, project_root="."):
 
     for line in ai_output.splitlines():
         if line.strip().startswith("# file:"):
-            # Save the previous block
             if current_file and buffer:
                 content = "\n".join(buffer).strip()
                 content = strip_code_fences(content)
@@ -131,47 +159,29 @@ def split_files(ai_output, project_root="."):
         else:
             buffer.append(line)
 
-    # Save the last one
     if current_file and buffer:
         content = "\n".join(buffer).strip()
         content = strip_code_fences(content)
         files[current_file] = content
 
-    # Special handling for routes.py → always append
     for path, content in list(files.items()):
         if path.endswith("routes.py"):
             file_path = os.path.join(project_root, path)
-
             if os.path.exists(file_path):
                 with open(file_path, "r", encoding="utf-8") as f:
                     existing = f.read()
-
                 updated = existing.strip() + "\n\n" + content.strip()
                 files[path] = updated
             else:
                 files[path] = content.strip()
-
     return files
-
-
-def strip_code_fences(content: str) -> str:
-    """Remove ```lang fences from AI output if present."""
-    lines = []
-    for line in content.splitlines():
-        if line.strip().startswith("```"):
-            continue  # skip fences like ```html or ```
-        lines.append(line)
-    return "\n".join(lines).strip()
-
 
 @app.route("/generate_feature", methods=["POST"])
 def generate_feature():
     feature_desc = request.form.get("featureDescription")
 
-    # Combine the base description with user input
     full_description = f"{base_description} {feature_desc}"
 
-    # Build the final prompt cleanly
     final_prompt = f"""
     You are an AI developer. The project has this structure:
 
@@ -180,26 +190,22 @@ def generate_feature():
     Task: {full_description}
 
     Instructions:
-    - Dont Change the file named app.py under any circumstances
+    - Don't change the file named app.py under any circumstances.
     - Indicate the file path in comments like # file: <path>.
-    - Also add the path to the nav bar {code} and dont change the existing paths.
+    - Also add the path to the nav bar {code} and don't change the existing paths.
     - If creating new features, place HTML in templates/ulogin/.
-    
     - Add Flask routes in controllers/routes.py inside the ulogin blueprint.
     - Do not include <html>, <head>, or <body> tags.
-    - All new or modified templates must extend 'ulayout.html' and put page-specific content inside % block content %% endblock %.
+    - All new or modified templates must extend 'ulayout.html' and put page-specific content inside % block content %% endblock % .
     - Keep code semantic, modular, and responsive.
-"""
+    """
 
-
-    # Get AI response
     response = model.generate_content(final_prompt)
     ai_output = response.text
 
-      # Debug: see AI output
-    files = split_files(ai_output)  # ✅ use only the global split_files
+    files = split_files(ai_output)
     print(files)
-    # Commit each file to GitHub via MCP
+
     for path, content in files.items():
         payload = {
             "file_path": path,

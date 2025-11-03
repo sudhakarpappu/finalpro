@@ -1,4 +1,4 @@
-name: Deploy to Azure VM
+name: Deploy Flask App to Azure VM (Gunicorn + Password Login)
 
 on:
   push:
@@ -8,27 +8,29 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Copy files to Azure VM
-        uses: appleboy/scp-action@v0.1.5
-        with:
-          host: ${{ secrets.AZURE_HOST }}
-          username: ${{ secrets.AZURE_USER }}
-          key: ${{ secrets.AZURE_SSH_KEY }}
-          source: "."
-          target: "/home/azureuser/yourrepo"
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      - name: SSH and restart app
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.AZURE_HOST }}
-          username: ${{ secrets.AZURE_USER }}
-          key: ${{ secrets.AZURE_SSH_KEY }}
-          script: |
-            cd /home/azureuser/yourrepo
+      - name: Deploy and Restart Gunicorn
+        run: |
+          sshpass -p "${{ secrets.AZURE_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.AZURE_USER }}@${{ secrets.AZURE_HOST }} "
+            echo '--- Pulling latest code ---'
+            cd ~/finalpro || exit 1
+            git pull origin main
+
+            echo '--- Activating virtual environment ---'
             source venv/bin/activate
+
+            echo '--- Installing dependencies ---'
             pip install -r requirements.txt
-            sudo systemctl restart yourapp.service
+
+            echo '--- Restarting Gunicorn ---'
+            pkill -f gunicorn || true
+            nohup gunicorn --bind 127.0.0.1:5000 app:app > gunicorn.log 2>&1 &
+            echo '✅ Deployment complete and Gunicorn restarted'
+          "
