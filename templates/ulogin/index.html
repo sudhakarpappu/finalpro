@@ -1,0 +1,27 @@
+{% extends 'ulogin/ulayout.html' %}
+
+{% block content %}
+  <div class="hero-section">
+    <h1>Welcome to Edu Blog</h1>
+    <p>Your source for insightful articles and educational content.</p>
+  </div>
+
+  <!-- New Feature Section -->
+  <section class="feature-section">
+    <h2>Get Started</h2>
+    <div class="feature-container">
+      <!-- New Responsive Feature Card -->
+      <a href="{{ url_for('ulogin.blog_help') }}" class="feature-card">
+        <h3>How to Create a Post</h3>
+        <p>Learn the simple steps to write, format, and publish your first blog post on our platform.</p>
+      </a>
+      <!-- You can add more feature cards here -->
+    </div>
+  </section>
+
+  <div class="main-content">
+    <h2>Latest Posts</h2>
+    <!-- Blog posts would be listed here -->
+    <p>No posts yet. Check back soon!</p>
+  </div>
+{% endblock %}
