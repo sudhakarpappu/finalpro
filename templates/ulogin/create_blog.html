@@ -1,0 +1,74 @@
+{% extends 'ulogin/ulayout.html' %}
+{% block content %}
+<style>
+  /* Page-specific styles for the creation form */
+  .create-blog-container {
+    max-width: 768px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+  }
+  .create-blog-container h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    color: #333;
+  }
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #444;
+  }
+  .form-group .form-control {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+  }
+  .form-group .form-control:focus {
+    outline: none;
+    border-color: #3d315b;
+  }
+  .btn-submit {
+    display: block;
+    width: 100%;
+    padding: 0.9rem;
+    background-color: #3d315b;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  .btn-submit:hover {
+    background-color: #4c4176;
+  }
+</style>
+
+<div class="create-blog-container">
+  <h2>Create a New Post</h2>
+  <form action="{{ url_for('ulogin.create_blog') }}" method="post">
+    <div class="form-group">
+      <label for="title">Post Title</label>
+      <input type="text" id="title" name="title" class="form-control" placeholder="Enter a catchy title" required>
+    </div>
+    <div class="form-group">
+      <label for="content">Content</label>
+      <textarea id="content" name="content" class="form-control" rows="12" placeholder="Write your thoughts..." required></textarea>
+    </div>
+    <div class="form-group">
+      <button type="submit" class="btn-submit">Publish Post</button>
+    </div>
+  </form>
+</div>
+{% endblock %}
