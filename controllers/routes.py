@@ -231,85 +231,90 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import Blueprint, render_template, request, redirect, url_for, session
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from werkzeug.security import generate_password_hash, check_password_hash
+from .db_setup import get_db_connection
 
-# Assuming 'ulogin' blueprint is defined here.
-# For context, a blueprint definition might look like this:
-# ulogin = Blueprint('ulogin', __name__, template_folder='../templates/ulogin')
+# Assuming you have blueprints for admin (alogin) and user (ulogin)
+alogin = Blueprint('alogin', __name__)
+ulogin = Blueprint('ulogin', __name__, template_folder='templates')
 
-# The user asked to add a new endpoint to an existing file.
-# We'll add the new route handler within the existing ulogin blueprint context.
+# ... (existing routes for alogin and ulogin)
 
-# Existing routes for the ulogin blueprint would be here...
+@ulogin.route('/')
+def index():
+    # Assuming this is your existing index route
+    return render_template('ulogin/index.html')
 
-@ulogin.route('/create_post', methods=['GET', 'POST'])
-def create_blog():
-    """
-    Renders the blog creation page and handles form submission.
-    """
-    if 'user' not in session:
-        return redirect(url_for('ulogin.login')) # Protect route
+@ulogin.route('/login')
+def login():
+    # Assuming this is your existing login route
+    return render_template('ulogin/login.html')
 
-    if request.method == 'POST':
-        title = request.form.get('title')
-        content = request.form.get('content')
-        
-        # Here, you would typically save the blog post to a database.
-        # For this task, we will just print it and redirect.
-        print(f"New Blog Post Submitted by {session['user']}:")
-        print(f"Title: {title}")
-        print(f"Content: {content}")
-        
-        return redirect(url_for('ulogin.uhome')) # Redirect to user home after creation
+@ulogin.route('/logout')
+def logout():
+    # Assuming this is your existing logout route
+    session.pop('user', None)
+    return redirect(url_for('ulogin.index'))
+    
+# Add the new route for the blog help page
+@ulogin.route('/blog_help')
+def blog_help():
+    """Renders the blog creation help page."""
+    return render_template('ulogin/blog_help.html')
 
-    return render_template('create_blog.html')
+# You can add more user-related routes here, like for posting a blog if it exists
+@ulogin.route('/post')
+def post():
+    return render_template('ulogin/post.html')
 
-# Other routes continue below...
+# Make sure to register these blueprints in your app.py if not already done.
+# Example for app.py (DO NOT MODIFY app.py, this is just for context):
+# from controllers.routes import alogin, ulogin
+# app.register_blueprint(alogin, url_prefix='/admin')
+# app.register_blueprint(ulogin)
 
-/* file: static/css/feature-card.css */
-.feature-card-container {
-  display: flex;
-  justify-content: center;
-  padding: 2rem 1rem;
+/* file: static/css/feature_card.css */
+.feature-section {
+    padding: 2rem 1rem;
+    text-align: center;
+}
+
+.feature-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+    margin-top: 1rem;
 }
 
 .feature-card {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
-  text-decoration: none;
-  color: #333;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  width: 100%;
-  max-width: 380px;
-  display: block;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    max-width: 320px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: #333;
 }
 
 .feature-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    transform: translateY(-10px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-.feature-card .card-image {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  background-color: #e9e9e9; /* Placeholder if image is missing */
+.feature-card h3 {
+    margin-top: 0;
+    color: #0056b3;
+    font-size: 1.5rem;
 }
 
-.feature-card .card-content {
-  padding: 1.5rem;
-}
-
-.feature-card .card-title {
-  font-size: 1.6rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem;
-}
-
-.feature-card .card-description {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: #555;
+.feature-card p {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #666;
 }
