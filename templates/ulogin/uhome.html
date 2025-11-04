@@ -1,38 +1,28 @@
-{% extends 'ulogin/layout.html' %}
+{% extends 'ulogin/ulayout.html' %}
 
 {% block content %}
-<div class="page-header">
-  <h1>Welcome, {{ session.get('user', 'Guest') }}!</h1>
-  <p>Explore recent posts or share your own story.</p>
-</div>
+  <h1 class="page-title">Welcome to the Blog</h1>
 
-<div class="features-grid">
-  <!-- This is an example of an existing card -->
+  <!-- New Responsive Feature Card -->
   <div class="feature-card">
-    <div class="card-content">
-      <h3>Read Latest Posts</h3>
-      <p>Catch up on the latest articles and insights from our authors and community.</p>
-      <a href="#" class="btn-read-more">Go to Blog</a>
+    <div class="feature-card-content">
+      <h2>Have something to share?</h2>
+      <p>Your voice matters. Create a new blog post and contribute to our community of learners and educators.</p>
+      <a href="{{ url_for('ulogin.create_post') }}" class="btn">Create New Post</a>
     </div>
   </div>
-  
-  <!-- START: New Responsive Feature Card -->
-  <div class="feature-card new-feature-card">
-    <div class="card-content">
-      <h3>Create Your Own Post</h3>
-      <p>Have something to share? Start writing your own blog post today and contribute to the community!</p>
-      <a href="{{ url_for('ulogin.create_post') }}" class="btn-read-more">Start Writing</a>
-    </div>
-  </div>
-  <!-- END: New Responsive Feature Card -->
 
-  <!-- This is another example of an existing card -->
-  <div class="feature-card">
-    <div class="card-content">
-      <h3>About Our Work</h3>
-      <p>Learn more about the projects we are passionate about and what drives us.</p>
-      <a href="#" class="btn-read-more">Learn More</a>
-    </div>
+  <!-- Existing blog posts section (example) -->
+  <div class="posts-grid">
+    {% for post in posts %}
+      <div class="post-card">
+        <h2><a href="#">{{ post.title }}</a></h2>
+        <p class="post-meta">by {{ post.author }} on {{ post.date }}</p>
+        <p>{{ post.content | truncate(150) }}</p>
+      </div>
+    {% else %}
+      <p>No posts yet. Why not create one?</p>
+    {% endfor %}
   </div>
-</div>
+
 {% endblock %}
