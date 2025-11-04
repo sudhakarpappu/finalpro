@@ -1,106 +1,145 @@
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Appending new styles for feature cards and the create-post form */
+
+/* Grid container for feature cards */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem 0;
 }
 
-body {
-  background: #272727;
-  font-family: "Montserrat", sans-serif;
-}
-
-.navMenu {
-  position: absolute;
-  top: 5%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.navMenu a {
-  color: #f6f4e6;
-  text-decoration: none;
-  font-size: 1.2em;
-  text-transform: uppercase;
-  font-weight: 500;
-  display: inline-block;
-  width: 80px;
-  transition: all 0.2s ease-in-out;
-}
-
-.navMenu a:hover {
-  color: #fddb3a;
-}
-
-.navMenu .dot {
-  width: 6px;
-  height: 6px;
-  background: #fddb3a;
-  border-radius: 50%;
-  opacity: 0;
-  transform: translateX(30px);
-  transition: all 0.2s ease-in-out;
-}
-
-.navMenu a:nth-child(1):hover ~ .dot {
-  transform: translateX(30px);
-  opacity: 1;
-}
-
-.navMenu a:nth-child(2):hover ~ .dot {
-  transform: translateX(110px);
-  opacity: 1;
-}
-
-.navMenu a:nth-child(3):hover ~ .dot {
-  transform: translateX(200px);
-  opacity: 1;
-}
-
-.navMenu a:nth-child(4):hover ~ .dot {
-  transform: translateX(285px);
-  opacity: 1;
-}
-
-.container {
-  max-width: 800px;
-  margin: 100px auto 20px;
-  background: #1f1f1f; /* darker background */
-  padding: 20px;
-  box-shadow: 0px 0px 10px #000;
-  color: #f6f4e6;
-  border-radius: 12px;
-}
-
-/* Fix user info alignment */
-.user-section {
-  position: absolute;
-  top: 10px;
-  right: 20px;
-  font-size: 1.1em;
-  font-weight: 500;
-  color: #f6f4e6;
+/* Base style for each feature card */
+.feature-card {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
+  flex-direction: column;
 }
 
-.user-section a {
-  color: #f6f4e6;
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.card-content {
+  padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-content h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.card-content p {
+  color: #666;
+  flex-grow: 1;
+  line-height: 1.6;
+}
+
+.btn-read-more {
+  align-self: flex-start;
+  padding: 0.6rem 1.2rem;
+  background-color: #007bff;
+  color: #fff;
   text-decoration: none;
+  border-radius: 5px;
+  text-align: center;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
+  font-weight: bold;
 }
 
-.user-section a:hover {
-  color: #fddb3a;
+.btn-read-more:hover {
+  background-color: #0056b3;
 }
 
-.user-section a {
-  color: #f6f4e6;
-  text-decoration: none;
+/* Special styling for the new feature card */
+.new-feature-card {
+  border: 2px dashed #007bff;
+  background-color: #f0f7ff;
 }
 
-.user-section a:hover {
-  color: #fddb3a;
+/* Styles for the Create Post Page */
+.create-post-container {
+  max-width: 768px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* login css */ 
+.create-post-container h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.post-form .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.post-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #555;
+}
+
+.post-form input[type="text"],
+.post-form textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box; /* Important for padding and width */
+  transition: border-color 0.3s ease;
+}
+
+.post-form input[type="text"]:focus,
+.post-form textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.post-form textarea {
+  resize: vertical;
+  min-height: 150px;
+}
+
+.btn-submit {
+  display: block;
+  width: 100%;
+  padding: 0.8rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-submit:hover {
+  background-color: #218838;
+}
+
+/* Flash message styling */
+.alert {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  color: #fff;
+}
+.alert-success { background-color: #28a745; }
+.alert-warning { background-color: #ffc107; color: #333; }
+.alert-danger { background-color: #dc3545; }
