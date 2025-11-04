@@ -1,13 +1,23 @@
-{% extends "/ulogin/ulayout.html" %}
-
+{% extends 'ulogin/ulayout.html' %}
 {% block content %}
-    {% for post in posts %}
-        <div class="post">
-        
-            <h2><a href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
-            <p><small>By {{ post.author }} on {{ post.date }}</small></p>
-            <p>{{ post.content[:100] }}...</p>
-        </div>
-        <hr>
-    {% endfor %}
+  <h1>Welcome, {{ session.get('user', 'Guest') }}!</h1>
+  <p>Explore recent posts or create your own.</p>
+  
+  <div class="feature-card-container">
+    <a href="{{ url_for('ulogin.create_blog') }}" class="feature-card">
+      <img src="{{ url_for('static', filename='img/create-blog-banner.jpg') }}" alt="A desk with a laptop and notebook" class="card-image">
+      <div class="card-content">
+        <h2 class="card-title">Create a New Post</h2>
+        <p class="card-description">Share your knowledge, stories, and ideas with the community. Click here to start writing.</p>
+      </div>
+    </a>
+  </div>
+
+  <hr>
+
+  <h2>Recent Posts</h2>
+  <div class="posts-list">
+    <!-- Existing blog posts would be dynamically loaded here -->
+    <p>No posts yet. Be the first to create one!</p>
+  </div>
 {% endblock %}
