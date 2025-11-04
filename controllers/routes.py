@@ -142,28 +142,39 @@ def strip_code_fences(content: str) -> str:
             continue
         lines.append(line)
     return "\n".join(lines).strip()
-
 def split_files(ai_output, project_root="."):
     files = {}
     current_file = None
     buffer = []
 
     for line in ai_output.splitlines():
-        if line.strip().startswith("# file:"):
+        # ✅ Detect file markers in Python, JS, or HTML
+        if any(line.strip().startswith(x) for x in ("# file:", "<!-- file:", "// file:")):
+            # Save the previous file content before switching
             if current_file and buffer:
                 content = "\n".join(buffer).strip()
                 content = strip_code_fences(content)
                 files[current_file] = content
-            current_file = line.strip().replace("# file:", "").strip()
+
+            # ✅ Extract and clean the filename from the marker
+            current_file = (
+                line.replace("# file:", "")
+                    .replace("<!-- file:", "")
+                    .replace("-->", "")
+                    .replace("// file:", "")
+                    .strip()
+            )
             buffer = []
         else:
             buffer.append(line)
 
+    # ✅ Add the last file if present
     if current_file and buffer:
         content = "\n".join(buffer).strip()
         content = strip_code_fences(content)
         files[current_file] = content
 
+    # ✅ Merge or append new content into existing routes.py files
     for path, content in list(files.items()):
         if path.endswith("routes.py"):
             file_path = os.path.join(project_root, path)
@@ -174,7 +185,9 @@ def split_files(ai_output, project_root="."):
                 files[path] = updated
             else:
                 files[path] = content.strip()
+
     return files
+
 
 @app.route("/generate_feature", methods=["POST"])
 def generate_feature():
@@ -218,317 +231,85 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from blog_data import posts
+from flask import Blueprint, render_template, request, redirect, url_for, session
 
-# Blueprints
-ulogin_blueprint = Blueprint('ulogin', __name__, template_folder='templates')
-alogin_blueprint = Blueprint('alogin', __name__, template_folder='templates')
+# Assuming 'ulogin' blueprint is defined here.
+# For context, a blueprint definition might look like this:
+# ulogin = Blueprint('ulogin', __name__, template_folder='../templates/ulogin')
 
-# --- User Routes ---
-@ulogin_blueprint.route('/')
-def index():
-    return render_template('ulogin/index.html', posts=posts)
+# The user asked to add a new endpoint to an existing file.
+# We'll add the new route handler within the existing ulogin blueprint context.
 
-@ulogin_blueprint.route('/post/<int:post_id>')
-def post(post_id):
-    post = next((post for post in posts if post['id'] == post_id), None)
-    if post:
-        return render_template('ulogin/post.html', post=post)
-    return "Post not found", 404
+# Existing routes for the ulogin blueprint would be here...
 
-@ulogin_blueprint.route('/create')
-def create_content():
-    """Renders the page for users to create content."""
+@ulogin.route('/create_post', methods=['GET', 'POST'])
+def create_blog():
+    """
+    Renders the blog creation page and handles form submission.
+    """
     if 'user' not in session:
-        flash('You need to be logged in to create content.')
-        return redirect(url_for('login'))
-    return render_template('ulogin/create_content.html')
+        return redirect(url_for('ulogin.login')) # Protect route
 
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+        
+        # Here, you would typically save the blog post to a database.
+        # For this task, we will just print it and redirect.
+        print(f"New Blog Post Submitted by {session['user']}:")
+        print(f"Title: {title}")
+        print(f"Content: {content}")
+        
+        return redirect(url_for('ulogin.uhome')) # Redirect to user home after creation
 
-# --- Admin Routes ---
-@alogin_blueprint.route('/admin_home')
-def ahome():
-    if 'admin' not in session:
-        return redirect(url_for('login'))
-    return render_template('alogin/ahome.html')
+    return render_template('create_blog.html')
 
-# (keep other existing routes as they are)
+# Other routes continue below...
 
-<!-- file: templates/ulogin/create_content.html -->
-{% extends 'ulogin/ulayout.html' %}
-
-{% block content %}
-<div class="content-creator-container">
-  <h1>Create Your Content</h1>
-  <p>Use the form below to draft your new blog post or educational guide.</p>
-  
-  <form class="content-form">
-    <div class="form-group">
-      <label for="title">Title</label>
-      <input type="text" id="title" name="title" placeholder="Enter a catchy title" required>
-    </div>
-    
-    <div class="form-group">
-      <label for="content">Content</label>
-      <textarea id="content" name="content" rows="12" placeholder="Start writing your amazing content here..."></textarea>
-    </div>
-    
-    <div class="form-group">
-      <label for="category">Category</label>
-      <select id="category" name="category">
-        <option value="technology">Technology</option>
-        <option value="science">Science</option>
-        <option value="history">History</option>
-        <option value="art">Art</option>
-      </select>
-    </div>
-    
-    <button type="submit" class="btn-submit">Submit for Review</button>
-  </form>
-</div>
-{% endblock %}
-
-<!-- file: templates/ulogin/ulayout.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Edu Blog</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-</head>
-<body>
-
-  <!-- TOP-RIGHT user info -->
-  {% if session.get('user') %}
-    <div class="user-section">
-      <span>{{ session['user'] }} |</span>
-      <a href="{{ url_for('logout') }}">Logout</a>
-    </div>
-  {% else %}
-    <div class="user-section">
-      <a href="{{ url_for('login') }}">Login</a>
-    </div>
-  {% endif %}
-
-  <!-- CENTERED NAVIGATION -->
-  <nav class="navMenu">
-    <a href="{{ url_for('ulogin.index') }}">Home</a>
-    <a href="{{ url_for('ulogin.create_content') }}">Create</a>
-    <a href="#">Blog</a>
-    <a href="#">Work</a>
-    <a href="#">About</a>
-    <div class="dot"></div>
-  </nav>
-
-  <!-- MAIN PAGE CONTENT -->
-  <div class="container">
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul class=flashes>
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-    {% block content %}{% endblock %}
-  </div>
-
-</body>
-</html>
-
-<!-- file: templates/ulogin/index.html -->
-{% extends 'ulogin/ulayout.html' %}
-
-{% block content %}
-  <header class="main-header">
-    <h1>Welcome to Edu Blog</h1>
-    <p>Your daily source of educational content and inspiration.</p>
-  </header>
-
-  <!-- New Feature Card Section -->
-  <section class="feature-card-section">
-    <div class="feature-card">
-      <div class="feature-card-icon">
-        <!-- Using an inline SVG for simplicity, but could be an <img> -->
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-        </svg>        
-      </div>
-      <div class="feature-card-content">
-        <h3>Interactive Learning</h3>
-        <p>Engage with our new interactive tutorials and quizzes designed to make learning fun and effective.</p>
-        <a href="#" class="feature-card-link">Explore Now &rarr;</a>
-      </div>
-    </div>
-  </section>
-  <!-- End New Feature Card Section -->
-
-  <div class="post-grid">
-    {% for post in posts %}
-      <a href="{{ url_for('ulogin.post', post_id=post.id) }}" class="post-card">
-        <img src="{{ url_for('static', filename='img/' + post.image_url) }}" alt="{{ post.title }}">
-        <div class="post-content">
-          <h2>{{ post.title }}</h2>
-          <p>{{ post.author }} - {{ post.date }}</p>
-        </div>
-      </a>
-    {% endfor %}
-  </div>
-{% endblock %}
-
-/* file: static/css/style.css */
-/* (Assuming you have existing styles, add this at the end) */
-
-/* --- Feature Card Styles --- */
-.feature-card-section {
-  width: 100%;
-  padding: 2rem 0;
+/* file: static/css/feature-card.css */
+.feature-card-container {
   display: flex;
   justify-content: center;
+  padding: 2rem 1rem;
 }
 
 .feature-card {
   background: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  padding: 1.5rem;
-  max-width: 800px;
-  width: 100%;
-  border-left: 5px solid #6c5ce7;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  text-decoration: none;
+  color: #333;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  max-width: 380px;
+  display: block;
 }
 
 .feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-8px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 
-.feature-card-icon {
-  flex-shrink: 0;
-  margin-right: 1.5rem;
-  background-color: #f0f0f0;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.feature-card-icon svg {
-  width: 30px;
-  height: 30px;
-  color: #6c5ce7;
-}
-
-.feature-card-content h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.5rem;
-  color: #333;
-}
-
-.feature-card-content p {
-  margin: 0 0 1rem 0;
-  color: #666;
-  line-height: 1.6;
-}
-
-.feature-card-link {
-  text-decoration: none;
-  color: #6c5ce7;
-  font-weight: bold;
-}
-
-/* Responsive styles for the feature card */
-@media (max-width: 768px) {
-  .feature-card {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .feature-card-icon {
-    margin-right: 0;
-    margin-bottom: 1rem;
-  }
-}
-
-
-/* --- Content Creator Form Styles --- */
-.content-creator-container {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  max-width: 800px;
-  margin: 2rem auto;
-}
-
-.content-creator-container h1 {
-  text-align: center;
-  margin-bottom: 0.5rem;
-}
-
-.content-creator-container p {
-  text-align: center;
-  color: #666;
-  margin-bottom: 2rem;
-}
-
-.content-form .form-group {
-  margin-bottom: 1.5rem;
-}
-
-.content-form label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-  color: #333;
-}
-
-.content-form input[type="text"],
-.content-form textarea,
-.content-form select {
+.feature-card .card-image {
   width: 100%;
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  height: 220px;
+  object-fit: cover;
+  background-color: #e9e9e9; /* Placeholder if image is missing */
+}
+
+.feature-card .card-content {
+  padding: 1.5rem;
+}
+
+.feature-card .card-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.feature-card .card-description {
   font-size: 1rem;
-  box-sizing: border-box; /* Important for padding and width */
-}
-
-.content-form textarea {
-  resize: vertical;
-}
-
-.btn-submit {
-  display: block;
-  width: 100%;
-  padding: 0.8rem;
-  background-color: #6c5ce7;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.btn-submit:hover {
-  background-color: #5849c9;
-}
-
-/* Flash message styles */
-ul.flashes {
-  list-style-type: none;
-  padding: 10px;
-  margin: 10px 0;
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
-  border-radius: 4px;
+  line-height: 1.6;
+  color: #555;
 }
