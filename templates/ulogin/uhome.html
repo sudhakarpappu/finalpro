@@ -1,23 +1,38 @@
-{% extends 'ulogin/ulayout.html' %}
+{% extends 'ulogin/layout.html' %}
+
 {% block content %}
+<div class="page-header">
   <h1>Welcome, {{ session.get('user', 'Guest') }}!</h1>
-  <p>Explore recent posts or create your own.</p>
+  <p>Explore recent posts or share your own story.</p>
+</div>
+
+<div class="features-grid">
+  <!-- This is an example of an existing card -->
+  <div class="feature-card">
+    <div class="card-content">
+      <h3>Read Latest Posts</h3>
+      <p>Catch up on the latest articles and insights from our authors and community.</p>
+      <a href="#" class="btn-read-more">Go to Blog</a>
+    </div>
+  </div>
   
-  <div class="feature-card-container">
-    <a href="{{ url_for('ulogin.create_blog') }}" class="feature-card">
-      <img src="{{ url_for('static', filename='img/create-blog-banner.jpg') }}" alt="A desk with a laptop and notebook" class="card-image">
-      <div class="card-content">
-        <h2 class="card-title">Create a New Post</h2>
-        <p class="card-description">Share your knowledge, stories, and ideas with the community. Click here to start writing.</p>
-      </div>
-    </a>
+  <!-- START: New Responsive Feature Card -->
+  <div class="feature-card new-feature-card">
+    <div class="card-content">
+      <h3>Create Your Own Post</h3>
+      <p>Have something to share? Start writing your own blog post today and contribute to the community!</p>
+      <a href="{{ url_for('ulogin.create_post') }}" class="btn-read-more">Start Writing</a>
+    </div>
   </div>
+  <!-- END: New Responsive Feature Card -->
 
-  <hr>
-
-  <h2>Recent Posts</h2>
-  <div class="posts-list">
-    <!-- Existing blog posts would be dynamically loaded here -->
-    <p>No posts yet. Be the first to create one!</p>
+  <!-- This is another example of an existing card -->
+  <div class="feature-card">
+    <div class="card-content">
+      <h3>About Our Work</h3>
+      <p>Learn more about the projects we are passionate about and what drives us.</p>
+      <a href="#" class="btn-read-more">Learn More</a>
+    </div>
   </div>
+</div>
 {% endblock %}
