@@ -150,13 +150,13 @@ def split_files(ai_output, project_root="."):
     for line in ai_output.splitlines():
         # ✅ Detect file markers in Python, JS, HTML, or CSS
         if any(line.strip().startswith(x) for x in ("# file:", "// file:", "<!-- file:", "/* file:")):
-            # Save current file before switching to next
+            # Save previous file before switching
             if current_file and buffer:
                 content = "\n".join(buffer).strip()
                 content = strip_code_fences(content)
                 files[current_file] = content
 
-            # ✅ Clean and extract the filename
+            # ✅ Extract and clean the filename
             current_file = (
                 line.replace("# file:", "")
                     .replace("// file:", "")
@@ -170,16 +170,18 @@ def split_files(ai_output, project_root="."):
         else:
             buffer.append(line)
 
-    # ✅ Add last file content
+    # ✅ Add the last file content
     if current_file and buffer:
         content = "\n".join(buffer).strip()
         content = strip_code_fences(content)
         files[current_file] = content
 
-    # ✅ Merge content into existing routes.py if found
+    # ✅ Handle merging or appending logic
     for path, content in list(files.items()):
-        if path.endswith("routes.py"):
-            file_path = os.path.join(project_root, path)
+        file_path = os.path.join(project_root, path)
+
+        # Append for routes.py and .css files
+        if path.endswith("routes.py") or path.endswith(".css"):
             if os.path.exists(file_path):
                 with open(file_path, "r", encoding="utf-8") as f:
                     existing = f.read()
@@ -187,6 +189,9 @@ def split_files(ai_output, project_root="."):
                 files[path] = updated
             else:
                 files[path] = content.strip()
+        else:
+            # For other files, just replace or create
+            files[path] = content.strip()
 
     return files
 
@@ -233,29 +238,19 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-# Assuming 'ulogin' blueprint is defined here, I will add the new route to it.
+from flask import Blueprint, render_template, session, redirect, url_for, flash
 
-# This is a placeholder for your existing blueprint definition
-ulogin = Blueprint('ulogin', __name__, url_prefix='/user', template_folder='../templates')
+# Assuming 'ulogin' blueprint is defined in this file or imported
+# For example: ulogin = Blueprint('ulogin', __name__)
 
-# ... any other existing routes on the 'ulogin' blueprint ...
+# ... existing routes for the ulogin blueprint ...
 
-# New endpoint for creating a blog post
-@ulogin.route('/create-post', methods=['GET', 'POST'])
+@ulogin.route('/create_post')
 def create_post():
-    # Redirect to login if user is not in session
+    """Renders the page for creating a new blog post."""
     if 'user' not in session:
-        flash('You need to be logged in to create a post.', 'warning')
-        return redirect(url_for('login')) # Assuming 'login' is the endpoint for the login page
+        flash('You must be logged in to create a post.', 'danger')
+        return redirect(url_for('login')) # Redirect to a generic login page
+    return render_template('ulogin/create_post.html', title="Create New Post")
 
-    if request.method == 'POST':
-        # Here you would handle form submission, save the data to a database, etc.
-        title = request.form.get('title')
-        content = request.form.get('content')
-        
-        # For now, we'll just flash a success message
-        flash(f'Post "{title}" created successfully!', 'success')
-        return redirect(url_for('uhome')) # Redirect to the user's home page after creation
-
-    return render_template('ulogin/create_post.html')
+# ... rest of the file ...
