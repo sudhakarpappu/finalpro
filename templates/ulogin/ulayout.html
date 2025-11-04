@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Edu Blog</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/feature-card.css') }}" />
 </head>
 <body>
 
@@ -24,6 +25,7 @@
   <nav class="navMenu">
     <a href="{{ url_for('index') }}">Home</a>
     <a href="#">Blog</a>
+    <a href="{{ url_for('ulogin.create_blog') }}">Create Post</a>
     <a href="#">Work</a>
     <a href="#">About</a>
     <div class="dot"></div>
