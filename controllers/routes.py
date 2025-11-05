@@ -238,31 +238,22 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from blog_data import get_posts, find_post_by_id, add_post
+from controllers.db_setup import find_user, add_user
 
-# This file is assumed to contain the blueprints for the application.
-# Core routes like index, login, and logout are assumed to be in app.py
-# to match the url_for() calls in the provided layout.
+# Assuming the blueprints are already defined like this:
+ulogin = Blueprint('ulogin', __name__, template_folder='../templates/ulogin', static_folder='../static')
+alogin = Blueprint('alogin', __name__, template_folder='../templates/alogin', static_folder='../static')
 
-# Admin blueprint (example)
-alogin = Blueprint('alogin', __name__, url_prefix='/admin')
+# ... (other existing routes for ulogin blueprint)
 
-@alogin.route('/')
-def admin_home():
-    return "Admin Home"
+@ulogin.route('/help')
+def help():
+    """Renders the help page for users on how to create a blog."""
+    if 'user' not in session:
+        flash('You need to be logged in to view this page.', 'warning')
+        return redirect(url_for('ulogin.login'))
+    return render_template('help.html')
 
-# User-facing features blueprint
-ulogin = Blueprint('ulogin', __name__, url_prefix='/user')
-
-@ulogin.route('/post/<int:post_id>')
-def post(post_id):
-    """Renders a single post page."""
-    # In a real app, you would fetch post data from a database.
-    return render_template('ulogin/post.html', post_id=post_id)
-
-# START: New endpoint for the "learn" page
-@ulogin.route('/learn')
-def learn():
-    """Renders the page with instructions on blog creation."""
-    return render_template('ulogin/learn.html')
-# END: New endpoint for the "learn" page
+# ... (other existing routes)
