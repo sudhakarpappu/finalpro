@@ -1,27 +1,62 @@
 {% extends 'ulogin/ulayout.html' %}
 
 {% block content %}
-  <div class="hero-section">
-    <h1>Welcome to Edu Blog</h1>
-    <p>Your source for insightful articles and educational content.</p>
+  <!-- Feature Card Section -->
+  <div class="feature-card-container">
+    <a href="{{ url_for('ulogin.learn') }}" class="feature-card">
+      <div class="feature-card-image-wrapper">
+        {# Note: Ensure you have an image at static/img/blog_creation.jpg for this card to display correctly. #}
+        <img src="{{ url_for('static', filename='img/blog_creation.jpg') }}" alt="A person writing on a laptop">
+      </div>
+      <div class="feature-card-content">
+        <h3>New to Blogging?</h3>
+        <p>Learn how to craft compelling stories, format your posts, and engage with your audience. Get started on your blogging journey with our easy-to-follow guide.</p>
+        <span class="feature-card-cta">Start Learning</span>
+      </div>
+    </a>
   </div>
 
-  <!-- New Feature Section -->
-  <section class="feature-section">
-    <h2>Get Started</h2>
-    <div class="feature-container">
-      <!-- New Responsive Feature Card -->
-      <a href="{{ url_for('ulogin.blog_help') }}" class="feature-card">
-        <h3>How to Create a Post</h3>
-        <p>Learn the simple steps to write, format, and publish your first blog post on our platform.</p>
-      </a>
-      <!-- You can add more feature cards here -->
+  <!-- Existing Blog Posts Section -->
+  <div class="posts-section">
+    <h2>Recent Posts</h2>
+    
+    {# This is a dummy loop for demonstration. In a real app, you would loop over posts from the database. #}
+    {% for i in range(3) %}
+    <div class="post-summary">
+      <h3><a href="{{ url_for('ulogin.post', post_id=i+1) }}">Sample Blog Post Title {{ i+1 }}</a></h3>
+      <p class="post-meta">Posted on October 26, 2023 by Author</p>
+      <p>This is a short summary of the blog post. It gives the reader an idea of the content and encourages them to click to read more. Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+      <a href="{{ url_for('ulogin.post', post_id=i+1) }}">Read More &rarr;</a>
     </div>
-  </section>
+    {% endfor %}
 
-  <div class="main-content">
-    <h2>Latest Posts</h2>
-    <!-- Blog posts would be listed here -->
-    <p>No posts yet. Check back soon!</p>
   </div>
+
+<style>
+  /* Basic styling for the dummy posts section */
+  .posts-section {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  .post-summary {
+    background: #fff;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .post-summary h3 a {
+    text-decoration: none;
+    color: #2c3e50;
+  }
+  .post-summary h3 a:hover {
+    color: #3498db;
+  }
+  .post-meta {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+  }
+</style>
 {% endblock %}
