@@ -107,104 +107,117 @@ body {
 
 /* ... existing styles ... */
 
+/* Flash messages styling */
+.flashes {
+    list-style: none;
+    padding: 0;
+    margin: 1em 0;
+}
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+}
+.alert-warning {
+    color: #8a6d3b;
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+}
+
 /* New Feature Card Styles */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
 .feature-card {
-  background-color: #f0f8ff; /* AliceBlue */
-  border-left: 5px solid #4a90e2; /* A nice blue */
-  margin: 2rem 0;
-  padding: 1.5rem 2rem;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-  flex-wrap: wrap; /* Allows wrapping on smaller screens */
-  gap: 1rem;
-}
-
-.feature-card-content h2 {
-  margin-top: 0;
-  color: #333;
-}
-
-.feature-card-content p {
-  margin-bottom: 1.5rem;
-  color: #555;
-  max-width: 600px;
-}
-
-.btn {
-  background-color: #4a90e2;
-  color: white;
-  padding: 10px 20px;
-  text-decoration: none;
-  border-radius: 5px;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-  border: none;
-  cursor: pointer;
-  display: inline-block;
-}
-
-.btn:hover {
-  background-color: #357abd;
-}
-
-/* Form Container Styles */
-.form-container {
-  background-color: #ffffff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  max-width: 700px;
-  margin: 2rem auto;
-}
-
-.form-container h2 {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  color: #333;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-  color: #555;
-}
-
-.form-group input[type="text"],
-.form-group textarea {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 1rem;
-  box-sizing: border-box; /* Ensures padding doesn't affect final width */
-}
-
-.form-group textarea {
-  resize: vertical;
-}
-
-.form-group .btn {
-  width: 100%;
-  padding: 12px;
-  font-size: 1.1rem;
-}
-
-/* Responsive adjustments for the feature card */
-@media (max-width: 768px) {
-  .feature-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
     flex-direction: column;
-    text-align: center;
-  }
+    justify-content: space-between;
+}
 
-  .feature-card-content p {
-    margin-bottom: 1rem;
-  }
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.card-content {
+    padding: 20px;
+}
+
+.card-content h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.card-content p {
+    color: #666;
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+.card-button {
+    display: inline-block;
+    background-color: #5d5dff;
+    color: white;
+    padding: 10px 15px;
+    margin-top: 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.card-button:hover {
+    background-color: #4a4ae6;
+}
+
+/* Styles for Help Page */
+.help-container {
+    background-color: #f9f9f9;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.help-container h1, .help-container h2 {
+    color: #333;
+}
+
+.help-container h1 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.step {
+    background-color: #fff;
+    padding: 20px;
+    border-left: 5px solid #5d5dff;
+    margin-bottom: 20px;
+    border-radius: 0 5px 5px 0;
+}
+
+.happy-blogging {
+    text-align: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: 30px;
+    color: #5d5dff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .help-container {
+        padding: 20px;
+    }
 }
