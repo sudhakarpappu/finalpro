@@ -238,16 +238,31 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import render_template, session, redirect, url_for, Blueprint
+from flask import Blueprint, render_template
 
-# Assuming 'ulogin' blueprint is defined in this file.
-# If not, you would need to define it first:
-# ulogin = Blueprint('ulogin', __name__, template_folder='templates')
+# This file is assumed to contain the blueprints for the application.
+# Core routes like index, login, and logout are assumed to be in app.py
+# to match the url_for() calls in the provided layout.
 
-# Add the new route to your existing ulogin blueprint
-@ulogin.route('/help')
-def help():
-    """Renders the help page with feature cards for logged-in users."""
-    if 'user' not in session:
-        return redirect(url_for('login'))
-    return render_template('ulogin/help.html')
+# Admin blueprint (example)
+alogin = Blueprint('alogin', __name__, url_prefix='/admin')
+
+@alogin.route('/')
+def admin_home():
+    return "Admin Home"
+
+# User-facing features blueprint
+ulogin = Blueprint('ulogin', __name__, url_prefix='/user')
+
+@ulogin.route('/post/<int:post_id>')
+def post(post_id):
+    """Renders a single post page."""
+    # In a real app, you would fetch post data from a database.
+    return render_template('ulogin/post.html', post_id=post_id)
+
+# START: New endpoint for the "learn" page
+@ulogin.route('/learn')
+def learn():
+    """Renders the page with instructions on blog creation."""
+    return render_template('ulogin/learn.html')
+# END: New endpoint for the "learn" page
