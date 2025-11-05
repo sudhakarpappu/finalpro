@@ -59,7 +59,7 @@ def get_connection():
 
     conn_str = (
         f"DRIVER={{{driver}}};"
-        f"SERVER={server};"
+        f"SERVER={server},1433;"
         f"DATABASE={database};"
         f"UID={username};"
         f"PWD={password};"
@@ -142,31 +142,46 @@ def strip_code_fences(content: str) -> str:
             continue
         lines.append(line)
     return "\n".join(lines).strip()
-
 def split_files(ai_output, project_root="."):
     files = {}
     current_file = None
     buffer = []
 
     for line in ai_output.splitlines():
-        if line.strip().startswith("# file:"):
+        # ✅ Detect file markers in Python, JS, HTML, or CSS
+        if any(line.strip().startswith(x) for x in ("# file:", "// file:", "<!-- file:", "/* file:")):
+            # Save previous file before switching
             if current_file and buffer:
                 content = "\n".join(buffer).strip()
                 content = strip_code_fences(content)
                 files[current_file] = content
-            current_file = line.strip().replace("# file:", "").strip()
+
+            # ✅ Extract and clean the filename
+            current_file = (
+                line.replace("# file:", "")
+                    .replace("// file:", "")
+                    .replace("<!-- file:", "")
+                    .replace("/* file:", "")
+                    .replace("-->", "")
+                    .replace("*/", "")
+                    .strip()
+            )
             buffer = []
         else:
             buffer.append(line)
 
+    # ✅ Add the last file content
     if current_file and buffer:
         content = "\n".join(buffer).strip()
         content = strip_code_fences(content)
         files[current_file] = content
 
+    # ✅ Handle merging or appending logic
     for path, content in list(files.items()):
-        if path.endswith("routes.py"):
-            file_path = os.path.join(project_root, path)
+        file_path = os.path.join(project_root, path)
+
+        # Append for routes.py and .css files
+        if path.endswith("routes.py") or path.endswith(".css"):
             if os.path.exists(file_path):
                 with open(file_path, "r", encoding="utf-8") as f:
                     existing = f.read()
@@ -174,7 +189,12 @@ def split_files(ai_output, project_root="."):
                 files[path] = updated
             else:
                 files[path] = content.strip()
+        else:
+            # For other files, just replace or create
+            files[path] = content.strip()
+
     return files
+
 
 @app.route("/generate_feature", methods=["POST"])
 def generate_feature():
