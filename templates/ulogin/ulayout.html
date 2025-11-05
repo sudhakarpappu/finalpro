@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Edu Blog</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/feature-card.css') }}" />
 </head>
 <body>
 
@@ -24,7 +25,7 @@
   <nav class="navMenu">
     <a href="{{ url_for('index') }}">Home</a>
     <a href="#">Blog</a>
-    <a href="{{ url_for('ulogin.create_post') }}">Create Post</a>
+    <a href="{{ url_for('ulogin.how_to_write') }}">How to Write</a>
     <a href="#">Work</a>
     <a href="#">About</a>
     <div class="dot"></div>
@@ -37,3 +38,93 @@
 
 </body>
 </html>
+
+{# file: templates/ulogin/how_to_write.html #}
+{% extends 'ulayout.html' %}
+
+{% block content %}
+<style>
+  .writing-guide {
+    max-width: 850px;
+    margin: 2rem auto;
+    padding: 2.5rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  }
+  .writing-guide h1 {
+    color: #2d3748;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .writing-guide h2 {
+    color: #4a5568;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+    margin-top: 2.5rem;
+  }
+  .writing-guide p, .writing-guide li {
+    line-height: 1.7;
+    color: #4a5568;
+  }
+  .writing-guide ul {
+    list-style-type: '✓';
+    padding-left: 25px;
+  }
+  .writing-guide li {
+      padding-left: 10px;
+      margin-bottom: 0.5rem;
+  }
+</style>
+
+<div class="writing-guide">
+  <h1>A Guide to Writing Great Blog Posts</h1>
+  <p>Welcome! Here are some essential tips to help you craft compelling content that resonates with readers.</p>
+
+  <h2>1. Find Your Niche</h2>
+  <p>Start by identifying your topic and target audience. A clear focus makes your content more valuable and easier for the right people to find.</p>
+  <ul>
+    <li>Identify your passions and expertise.</li>
+    <li>Research what your potential audience is searching for.</li>
+    <li>Create a unique angle or perspective.</li>
+  </ul>
+
+  <h2>2. Create a Killer Headline</h2>
+  <p>Your headline is your first impression—make it count. It should be clear, intriguing, and accurately reflect your content.</p>
+
+  <h2>3. Structure for Readability</h2>
+  <p>Online readers often scan. Use formatting to make your post easy to digest.</p>
+  <ul>
+      <li>Use short paragraphs and sentences.</li>
+      <li>Incorporate headings (H2, H3) to break up sections.</li>
+      <li>Use bullet points or numbered lists for clarity.</li>
+  </ul>
+
+  <h2>4. Write, Edit, and Proofread</h2>
+  <p>Get your ideas down in a first draft without worrying about perfection. Then, come back to edit for clarity, tone, and flow. Finally, proofread carefully to catch any spelling or grammar mistakes.</p>
+</div>
+{% endblock %}
+
+{# file: templates/ulogin/index.html #}
+{% extends 'ulayout.html' %}
+
+{% block content %}
+  {# Assuming there is existing content here for the home page #}
+  <h1 style="text-align: center; margin-top: 2rem;">Welcome to the Blog!</h1>
+  <p style="text-align: center;">Here are the latest posts.</p>
+  
+  {# ... existing blog post loop ... #}
+
+  <!-- New Responsive Feature Card -->
+  <div class="feature-card-container">
+    <div class="feature-card">
+      <div class="feature-card-content">
+        <h3>Ready to Share Your Story?</h3>
+        <p>Learn how to write blog posts that capture attention and engage your audience. Check out our guide to get started!</p>
+        <a href="{{ url_for('ulogin.how_to_write') }}" class="feature-card-link">Start Writing</a>
+      </div>
+    </div>
+  </div>
+
+  {# ... rest of the page content ... #}
+{% endblock %}
