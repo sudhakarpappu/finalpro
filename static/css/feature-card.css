@@ -1,57 +1,49 @@
-.feature-card-container {
+.feature-container {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  align-items: center;
-  padding: 2rem 1rem;
-  margin-top: 2rem;
-  background-color: #f4f7f6;
-  border-radius: 8px;
+  gap: 2rem;
+  padding: 2rem;
+  text-align: center;
 }
 
 .feature-card {
-  background: white;
+  background-color: #fff;
   border-radius: 10px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  max-width: 400px;
-  width: 100%;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
 }
 
 .feature-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-10px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
-.feature-card-content {
-  padding: 1.5rem 2rem;
+.feature-card-header h2 {
+  margin: 0;
+  padding: 1.5rem;
+  background-color: #4a90e2;
+  color: white;
 }
 
-.feature-card-content h3 {
-  margin-top: 0;
-  font-size: 1.6rem;
-  color: #333;
+.feature-card-body {
+  padding: 1.5rem;
+  flex-grow: 1;
 }
 
-.feature-card-content p {
+.feature-card-body p {
   color: #555;
-  font-size: 1rem;
   line-height: 1.6;
 }
 
-.feature-card-link {
-  display: inline-block;
-  margin-top: 1.5rem;
-  padding: 0.7rem 1.8rem;
-  background-color: #5a67d8;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 25px;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
+@media (max-width: 768px) {
+  .feature-card {
+    width: 90%;
+  }
 }
 
-.feature-card-link:hover {
-  background-color: #434190;
-}
+Next, the new CSS file is linked in the user layout, and a "Help" link is added to the navigation bar.
