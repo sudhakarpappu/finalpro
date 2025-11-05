@@ -238,15 +238,16 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import Blueprint, render_template, session, flash, redirect, url_for
+from flask import render_template, session, redirect, url_for, Blueprint
 
-# Assuming the 'ulogin' blueprint is already defined in this file.
-# For example: ulogin = Blueprint('ulogin', __name__, template_folder='../templates')
+# Assuming 'ulogin' blueprint is defined in this file.
+# If not, you would need to define it first:
+# ulogin = Blueprint('ulogin', __name__, template_folder='templates')
 
-@ulogin.route('/how-to-write')
-def how_to_write():
-    """Renders the page with tips on how to write a blog post."""
+# Add the new route to your existing ulogin blueprint
+@ulogin.route('/help')
+def help():
+    """Renders the help page with feature cards for logged-in users."""
     if 'user' not in session:
-        flash('You need to be logged in to view this page.', 'info')
         return redirect(url_for('login'))
-    return render_template('ulogin/how_to_write.html', title='How to Write')
+    return render_template('ulogin/help.html')
