@@ -238,22 +238,20 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from blog_data import get_posts, find_post_by_id, add_post
-from controllers.db_setup import find_user, add_user
+from flask import Blueprint, render_template, session, redirect, url_for
 
-# Assuming the blueprints are already defined like this:
-ulogin = Blueprint('ulogin', __name__, template_folder='../templates/ulogin', static_folder='../static')
-alogin = Blueprint('alogin', __name__, template_folder='../templates/alogin', static_folder='../static')
+# Assuming 'ulogin' blueprint is defined elsewhere in this file
+# and this is just an addition to the existing routes.
+# For context, a blueprint might be initialized like this:
+# ulogin = Blueprint('ulogin', __name__, static_folder='static', template_folder='templates')
 
-# ... (other existing routes for ulogin blueprint)
-
-@ulogin.route('/help')
-def help():
-    """Renders the help page for users on how to create a blog."""
-    if 'user' not in session:
-        flash('You need to be logged in to view this page.', 'warning')
-        return redirect(url_for('ulogin.login'))
-    return render_template('help.html')
-
-# ... (other existing routes)
+# This is the new route for the "How to Write a Blog" page.
+@ulogin.route('/how-to-write')
+def how_to_write():
+    """
+    Renders a page with tips on how to write a good blog post.
+    Redirects to login page if user is not in session.
+    """
+    if not session.get('user'):
+        return redirect(url_for('login'))
+    return render_template('ulogin/how_to_write.html', title="How to Write a Blog")
