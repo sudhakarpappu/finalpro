@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Edu Blog</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/feature-card.css') }}" />
 </head>
 <body>
 
@@ -13,28 +12,100 @@
   {% if session.get('user') %}
     <div class="user-section">
       <span>{{ session['user'] }} |</span>
-      <a href="{{ url_for('logout') }}">Logout</a>
+      <a href="{{ url_for('ulogin.logout') }}">Logout</a>
     </div>
   {% else %}
     <div class="user-section">
-      <a href="{{ url_for('login') }}">Login</a>
+      <a href="{{ url_for('ulogin.login') }}">Login</a>
     </div>
   {% endif %}
 
   <!-- CENTERED NAVIGATION -->
   <nav class="navMenu">
-    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('ulogin.index') }}">Home</a>
     <a href="#">Blog</a>
-    <a href="{{ url_for('ulogin.learn') }}">Learn</a>
     <a href="#">Work</a>
+    <a href="{{ url_for('ulogin.help') }}">Help</a>
     <a href="#">About</a>
     <div class="dot"></div>
   </nav>
 
   <!-- MAIN PAGE CONTENT -->
   <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
     {% block content %}{% endblock %}
   </div>
 
 </body>
 </html>
+
+{# file: templates/ulogin/help.html #}
+{% extends 'ulayout.html' %}
+
+{% block content %}
+<div class="help-container">
+  <h1>How to Create a Blog Post</h1>
+  <p>Creating a blog post on our platform is simple and straightforward. Follow these steps to share your thoughts with the world.</p>
+  
+  <div class="step">
+    <h2>Step 1: Navigate to the "Post" Page</h2>
+    <p>From the main navigation bar, find and click on the "Post" or "Create Post" link. This will take you to the blog post creation page.</p>
+  </div>
+  
+  <div class="step">
+    <h2>Step 2: Fill in the Details</h2>
+    <p>You'll see a form with fields for a title, a short description (excerpt), and the main content of your blog. Fill these out with your amazing ideas.</p>
+  </div>
+
+  <div class="step">
+    <h2>Step 3: Add an Image (Optional)</h2>
+    <p>You can add a cover image for your post. Click the "Choose File" button to upload an image from your device. A good image can make your post more engaging!</p>
+  </div>
+
+  <div class="step">
+    <h2>Step 4: Submit Your Post</h2>
+    <p>Once you are happy with your content, click the "Submit" button at the bottom of the form. Your post will be published and visible to others.</p>
+  </div>
+
+  <p class="happy-blogging">Happy Blogging!</p>
+</div>
+{% endblock %}
+
+{# file: templates/ulogin/index.html #}
+{% extends 'ulayout.html' %}
+{% block content %}
+<h1>Welcome to the Blog!</h1>
+<p>Check out our latest posts and features below.</p>
+
+<div class="features-grid">
+    <div class="feature-card">
+        <div class="card-content">
+            <h3>Need Help?</h3>
+            <p>Learn how to create, edit, and manage your blog posts with our step-by-step guide.</p>
+            <a href="{{ url_for('ulogin.help') }}" class="card-button">View Guide</a>
+        </div>
+    </div>
+    <!-- You can add more feature cards here -->
+</div>
+
+<hr style="margin-top: 40px; margin-bottom: 40px;">
+
+<!-- This is where the blog posts from the original index would go -->
+{% for post in posts %}
+    <div class="post-preview">
+        <h2><a href="{{ url_for('ulogin.post', post_id=post.id) }}">{{ post.title }}</a></h2>
+        <p class="post-meta">Posted by {{ post.author }} on {{ post.date }}</p>
+        <p>{{ post.excerpt }}</p>
+    </div>
+    <hr>
+{% endfor %}
+
+{% endblock %}
