@@ -238,20 +238,32 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import Blueprint, render_template, session, redirect, url_for
+from flask import Blueprint, render_template, session, redirect, url_for, request, flash
+from werkzeug.security import generate_password_hash, check_password_hash
+from .db_setup import get_db_connection
 
-# Assuming 'ulogin' blueprint is defined elsewhere in this file
-# and this is just an addition to the existing routes.
-# For context, a blueprint might be initialized like this:
-# ulogin = Blueprint('ulogin', __name__, static_folder='static', template_folder='templates')
+# This is an example of how your ulogin blueprint might be defined.
+# I am adding the new route to it.
+ulogin = Blueprint('ulogin', __name__, static_folder='static', template_folder='templates')
 
-# This is the new route for the "How to Write a Blog" page.
-@ulogin.route('/how-to-write')
-def how_to_write():
-    """
-    Renders a page with tips on how to write a good blog post.
-    Redirects to login page if user is not in session.
-    """
-    if not session.get('user'):
+# --- Existing User Routes Would Be Here ---
+
+@ulogin.route('/uhome')
+def uhome():
+    # This is an example of an existing route
+    if 'user' in session:
+        return render_template('ulogin/uhome.html')
+    return redirect(url_for('login'))
+
+# ... other routes like login, post, etc.
+
+# --- New Route for Blog Creation Help ---
+@ulogin.route('/create-help')
+def create_help():
+    """Renders the help page for creating a blog post."""
+    if 'user' not in session:
+        flash('You must be logged in to view this page.', 'warning')
         return redirect(url_for('login'))
-    return render_template('ulogin/how_to_write.html', title="How to Write a Blog")
+    return render_template('ulogin/create_help.html')
+
+# --- Other Existing User Routes Might Continue Here ---
