@@ -1,28 +1,21 @@
-{% extends 'ulogin/ulayout.html' %}
+{% extends 'ulayout.html' %}
 
 {% block content %}
-  <h1 class="page-title">Welcome to the Blog</h1>
+  <h1>Welcome, {{ session.get('user', 'Guest') }}!</h1>
+  <p>Explore the amazing content and features available to you.</p>
 
-  <!-- New Responsive Feature Card -->
-  <div class="feature-card">
-    <div class="feature-card-content">
-      <h2>Have something to share?</h2>
-      <p>Your voice matters. Create a new blog post and contribute to our community of learners and educators.</p>
-      <a href="{{ url_for('ulogin.create_post') }}" class="btn">Create New Post</a>
+  <!-- New Feature Card Section -->
+  <div class="feature-card-container">
+    <div class="feature-card">
+      <img src="{{ url_for('static', filename='img/create_blog.jpg') }}" alt="Person writing on a laptop" class="feature-card-img">
+      <div class="feature-card-content">
+        <h3>New to Blogging?</h3>
+        <p>Learn how to create, format, and publish your first blog post with our easy-to-follow guide.</p>
+        <a href="{{ url_for('ulogin.create_help') }}" class="feature-card-btn">Get Started</a>
+      </div>
     </div>
   </div>
 
-  <!-- Existing blog posts section (example) -->
-  <div class="posts-grid">
-    {% for post in posts %}
-      <div class="post-card">
-        <h2><a href="#">{{ post.title }}</a></h2>
-        <p class="post-meta">by {{ post.author }} on {{ post.date }}</p>
-        <p>{{ post.content | truncate(150) }}</p>
-      </div>
-    {% else %}
-      <p>No posts yet. Why not create one?</p>
-    {% endfor %}
-  </div>
-
+  <!-- Other existing content for uhome.html can go here -->
+  
 {% endblock %}
