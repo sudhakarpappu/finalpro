@@ -238,32 +238,72 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import Blueprint, render_template, session, redirect, url_for, request, flash
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from .db_setup import get_db_connection
+from blog_data import posts
 
-# This is an example of how your ulogin blueprint might be defined.
-# I am adding the new route to it.
-ulogin = Blueprint('ulogin', __name__, static_folder='static', template_folder='templates')
+# Define blueprints
+ulogin_bp = Blueprint('ulogin', __name__, template_folder='../templates/ulogin')
+alogin_bp = Blueprint('alogin', __name__, template_folder='../templates/alogin')
+main_bp = Blueprint('main', __name__, template_folder='../templates')
 
-# --- Existing User Routes Would Be Here ---
+# User-facing routes
+@ulogin_bp.route('/')
+def index():
+    return render_template('index.html')
 
-@ulogin.route('/uhome')
+@ulogin_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        # Simple validation
+        if username == 'user' and password == 'password':
+            session['user'] = username
+            flash('You were successfully logged in', 'success')
+            return redirect(url_for('ulogin.uhome'))
+        else:
+            flash('Invalid credentials', 'danger')
+    return render_template('login.html')
+
+@ulogin_bp.route('/uhome')
 def uhome():
-    # This is an example of an existing route
-    if 'user' in session:
-        return render_template('ulogin/uhome.html')
-    return redirect(url_for('login'))
-
-# ... other routes like login, post, etc.
-
-# --- New Route for Blog Creation Help ---
-@ulogin.route('/create-help')
-def create_help():
-    """Renders the help page for creating a blog post."""
     if 'user' not in session:
-        flash('You must be logged in to view this page.', 'warning')
-        return redirect(url_for('login'))
-    return render_template('ulogin/create_help.html')
+        return redirect(url_for('ulogin.login'))
+    return render_template('uhome.html', posts=posts)
 
-# --- Other Existing User Routes Might Continue Here ---
+@ulogin_bp.route('/post/<int:post_id>')
+def post(post_id):
+    post = next((post for post in posts if post['id'] == post_id), None)
+    if post:
+        return render_template('post.html', post=post)
+    return 'Post not found', 404
+
+@ulogin_bp.route('/create_blog')
+def create_blog():
+    """Renders the page for users to create a new blog post."""
+    if 'user' not in session:
+        return redirect(url_for('ulogin.login'))
+    return render_template('create_blog.html')
+
+@ulogin_bp.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('ulogin.index'))
+
+# Admin-facing routes
+@alogin_bp.route('/ahome')
+def ahome():
+    return render_template('alogin/ahome.html')
+
+@alogin_bp.route('/features')
+def features():
+    return render_template('alogin/features.html')
+
+def register_routes(app):
+    app.register_blueprint(ulogin_bp, url_prefix='/user')
+    app.register_blueprint(alogin_bp, url_prefix='/admin')
+    
+    @app.route('/')
+    def index():
+        return render_template('ulogin/index.html')
