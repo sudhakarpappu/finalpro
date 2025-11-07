@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Edu Blog</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/feature_card.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/feature-card.css') }}" />
 </head>
 <body>
 
@@ -13,19 +13,18 @@
   {% if session.get('user') %}
     <div class="user-section">
       <span>{{ session['user'] }} |</span>
-      <a href="{{ url_for('logout') }}">Logout</a>
+      <a href="{{ url_for('ulogin.logout') }}">Logout</a>
     </div>
   {% else %}
     <div class="user-section">
-      <a href="{{ url_for('login') }}">Login</a>
+      <a href="{{ url_for('ulogin.login') }}">Login</a>
     </div>
   {% endif %}
 
   <!-- CENTERED NAVIGATION -->
   <nav class="navMenu">
-    <a href="{{ url_for('index') }}">Home</a>
-    <a href="#">Blog</a>
-    <a href="{{ url_for('ulogin.how_to_write') }}">How to Write</a>
+    <a href="{{ url_for('ulogin.uhome') }}">Home</a>
+    <a href="{{ url_for('ulogin.create_blog') }}">Create Blog</a>
     <a href="#">Work</a>
     <a href="#">About</a>
     <div class="dot"></div>
@@ -33,6 +32,13 @@
 
   <!-- MAIN PAGE CONTENT -->
   <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
     {% block content %}{% endblock %}
   </div>
 
