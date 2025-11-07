@@ -1,21 +1,33 @@
-{% extends 'ulayout.html' %}
+{% extends 'ulogin/ulayout.html' %}
 
 {% block content %}
-  <h1>Welcome, {{ session.get('user', 'Guest') }}!</h1>
-  <p>Explore the amazing content and features available to you.</p>
+<div class="header">
+  <h1>Welcome to Your Dashboard</h1>
+  <p>Explore existing posts or create your own.</p>
+</div>
 
-  <!-- New Feature Card Section -->
-  <div class="feature-card-container">
-    <div class="feature-card">
-      <img src="{{ url_for('static', filename='img/create_blog.jpg') }}" alt="Person writing on a laptop" class="feature-card-img">
-      <div class="feature-card-content">
-        <h3>New to Blogging?</h3>
-        <p>Learn how to create, format, and publish your first blog post with our easy-to-follow guide.</p>
-        <a href="{{ url_for('ulogin.create_help') }}" class="feature-card-btn">Get Started</a>
+<!-- Feature Card Section -->
+<div class="features-grid">
+  <div class="feature-card">
+    <a href="{{ url_for('ulogin.create_blog') }}">
+      <div class="card-content">
+        <h3>Create a New Blog</h3>
+        <p>Share your thoughts, stories, and ideas with the world. Start writing your masterpiece now.</p>
       </div>
-    </div>
+    </a>
   </div>
+</div>
 
-  <!-- Other existing content for uhome.html can go here -->
-  
+
+<!-- Existing Blog Posts -->
+<div class="posts-container">
+  <h2>Recent Posts</h2>
+  {% for post in posts %}
+  <div class="post-summary">
+    <h3><a href="{{ url_for('ulogin.post', post_id=post.id) }}">{{ post.title }}</a></h3>
+    <p>by {{ post.author }} on {{ post.date_posted }}</p>
+    <p>{{ post.content[:150] }}...</p>
+  </div>
+  {% endfor %}
+</div>
 {% endblock %}
