@@ -10,7 +10,6 @@ import base64
 import requests
 import pyodbc
 
-
 # Azure SQL Server connection details
 # (Set these in your .env file for safety)
 # Example .env entries:
@@ -59,14 +58,13 @@ def get_connection():
 
     conn_str = (
         f"DRIVER={{{driver}}};"
-        f"SERVER={server},1433;"
+        f"SERVER=tcp:{server},1433;"
         f"DATABASE={database};"
         f"UID={username};"
         f"PWD={password};"
         "Encrypt=yes;"
         "TrustServerCertificate=no;"
-        "Connection Timeout=30;"
-    )
+        "Connection Timeout=30;"    )
     return pyodbc.connect(conn_str)
 
 @app.route('/signup', methods=['POST'])
@@ -142,46 +140,31 @@ def strip_code_fences(content: str) -> str:
             continue
         lines.append(line)
     return "\n".join(lines).strip()
+
 def split_files(ai_output, project_root="."):
     files = {}
     current_file = None
     buffer = []
 
     for line in ai_output.splitlines():
-        # ✅ Detect file markers in Python, JS, HTML, or CSS
-        if any(line.strip().startswith(x) for x in ("# file:", "// file:", "<!-- file:", "/* file:")):
-            # Save previous file before switching
+        if line.strip().startswith("# file:"):
             if current_file and buffer:
                 content = "\n".join(buffer).strip()
                 content = strip_code_fences(content)
                 files[current_file] = content
-
-            # ✅ Extract and clean the filename
-            current_file = (
-                line.replace("# file:", "")
-                    .replace("// file:", "")
-                    .replace("<!-- file:", "")
-                    .replace("/* file:", "")
-                    .replace("-->", "")
-                    .replace("*/", "")
-                    .strip()
-            )
+            current_file = line.strip().replace("# file:", "").strip()
             buffer = []
         else:
             buffer.append(line)
 
-    # ✅ Add the last file content
     if current_file and buffer:
         content = "\n".join(buffer).strip()
         content = strip_code_fences(content)
         files[current_file] = content
 
-    # ✅ Handle merging or appending logic
     for path, content in list(files.items()):
-        file_path = os.path.join(project_root, path)
-
-        # Append for routes.py and .css files
-        if path.endswith("routes.py") or path.endswith(".css"):
+        if path.endswith("routes.py"):
+            file_path = os.path.join(project_root, path)
             if os.path.exists(file_path):
                 with open(file_path, "r", encoding="utf-8") as f:
                     existing = f.read()
@@ -189,12 +172,7 @@ def split_files(ai_output, project_root="."):
                 files[path] = updated
             else:
                 files[path] = content.strip()
-        else:
-            # For other files, just replace or create
-            files[path] = content.strip()
-
     return files
-
 
 @app.route("/generate_feature", methods=["POST"])
 def generate_feature():
@@ -238,72 +216,130 @@ def generate_feature():
 
     return redirect("/features")
 
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
-from .db_setup import get_db_connection
-from blog_data import posts
+from flask import Blueprint, render_template, session, redirect, url_for
 
-# Define blueprints
-ulogin_bp = Blueprint('ulogin', __name__, template_folder='../templates/ulogin')
-alogin_bp = Blueprint('alogin', __name__, template_folder='../templates/alogin')
-main_bp = Blueprint('main', __name__, template_folder='../templates')
+# Assuming 'ulogin' blueprint is already defined in this file
+# For example:
+# ulogin = Blueprint('ulogin', __name__, template_folder='../templates')
 
-# User-facing routes
-@ulogin_bp.route('/')
-def index():
-    return render_template('index.html')
-
-@ulogin_bp.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        # Simple validation
-        if username == 'user' and password == 'password':
-            session['user'] = username
-            flash('You were successfully logged in', 'success')
-            return redirect(url_for('ulogin.uhome'))
-        else:
-            flash('Invalid credentials', 'danger')
-    return render_template('login.html')
-
-@ulogin_bp.route('/uhome')
-def uhome():
-    if 'user' not in session:
-        return redirect(url_for('ulogin.login'))
-    return render_template('uhome.html', posts=posts)
-
-@ulogin_bp.route('/post/<int:post_id>')
-def post(post_id):
-    post = next((post for post in posts if post['id'] == post_id), None)
-    if post:
-        return render_template('post.html', post=post)
-    return 'Post not found', 404
-
-@ulogin_bp.route('/create_blog')
-def create_blog():
-    """Renders the page for users to create a new blog post."""
-    if 'user' not in session:
-        return redirect(url_for('ulogin.login'))
-    return render_template('create_blog.html')
-
-@ulogin_bp.route('/logout')
-def logout():
-    session.pop('user', None)
-    return redirect(url_for('ulogin.index'))
-
-# Admin-facing routes
-@alogin_bp.route('/ahome')
-def ahome():
-    return render_template('alogin/ahome.html')
-
-@alogin_bp.route('/features')
+@ulogin.route('/features')
 def features():
-    return render_template('alogin/features.html')
+    """Renders the new features page."""
+    if not session.get('user'):
+        return redirect(url_for('login'))
+    return render_template('ulogin/features.html')
 
-def register_routes(app):
-    app.register_blueprint(ulogin_bp, url_prefix='/user')
-    app.register_blueprint(alogin_bp, url_prefix='/admin')
-    
-    @app.route('/')
-    def index():
-        return render_template('ulogin/index.html')
+<!-- file: templates/ulogin/ulayout.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edu Blog</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/features.css') }}" />
+</head>
+<body>
+
+  <!-- TOP-RIGHT user info -->
+  {% if session.get('user') %}
+    <div class="user-section">
+      <span>{{ session['user'] }} |</span>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+  {% else %}
+    <div class="user-section">
+      <a href="{{ url_for('login') }}">Login</a>
+    </div>
+  {% endif %}
+
+  <!-- CENTERED NAVIGATION -->
+  <nav class="navMenu">
+    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('ulogin.features') }}">Features</a>
+    <a href="#">Work</a>
+    <a href="#">About</a>
+    <div class="dot"></div>
+  </nav>
+
+  <!-- MAIN PAGE CONTENT -->
+  <div class="container">
+    {% block content %}{% endblock %}
+  </div>
+
+</body>
+</html>
+<!-- file: templates/ulogin/features.html -->
+{% extends "ulogin/ulayout.html" %}
+
+{% block content %}
+<div class="features-container">
+  <h1 class="features-title">Our Features</h1>
+  <div class="features-grid">
+    <!-- Feature Card 1 -->
+    <div class="feature-card">
+      <h2 class="card-title">Interactive Learning</h2>
+      <p class="card-text">Engage with our interactive modules and quizzes to enhance your understanding of complex topics.</p>
+    </div>
+
+    <!-- Feature Card 2 -->
+    <div class="feature-card">
+      <h2 class="card-title">Expert Tutors</h2>
+      <p class="card-text">Learn from the best. Our platform connects you with experienced tutors from various fields.</p>
+    </div>
+
+    <!-- Feature Card 3 -->
+    <div class="feature-card">
+      <h2 class="card-title">Community Support</h2>
+      <p class="card-text">Join a vibrant community of learners. Share knowledge, ask questions, and grow together.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+/* file: static/css/features.css */
+
+.features-container {
+  padding: 40px 20px;
+  text-align: center;
+  color: #333;
+}
+
+.features-title {
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 25px rgba(45, 121, 252, 0.15);
+}
+
+.card-title {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  color: #3498db;
+}
+
+.card-text {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #555;
+}
